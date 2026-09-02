@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'tela_livros.dart';
 
 class TelaInicial extends StatelessWidget {
   const TelaInicial({super.key});
 
   @override
-  Widget build(BuildContext) {
+  Widget build(BuildContext contextTelaInicial) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Biblioteca Escolar'),
@@ -29,6 +30,20 @@ class TelaInicial extends StatelessWidget {
             ),
 
             const SizedBox(height: 40),
+
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                    contextTelaInicial,
+                    MaterialPageRoute(
+                        builder: (contextRota) => const TelaLivros(),
+                    ),
+                );
+              },
+              child: const Text('Livros'),
+            ),
+
+            const SizedBox(height: 15),
 
             ElevatedButton(
               onPressed: () {},
