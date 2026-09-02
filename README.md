@@ -1,17 +1,47 @@
-# biblioteca_escolar
+# Biblioteca Escolar
 
-A new Flutter project.
+Aplicativo mobile desenvolvido em Flutter para auxiliar no gerenciamento da biblioteca escolar.
 
-## Getting Started
+## Objetivo
 
-This project is a starting point for a Flutter application.
+O aplicativo tem como objetivo facilitar o cadastro de livros, alunos e o controle de empréstimos da biblioteca.
 
-A few resources to get you started if this is your first Flutter project:
+## Funcionalidades planejadas
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+- Cadastro de livros
+- Cadastro de alunos
+- Controle de empréstimos e devoluções
+- Leitura de código de barras/ISBN pela câmera
+- Consulta automática de informações de livros pelo ISBN
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Tecnologias
+
+- Flutter
+- Dart
+
+## Status
+
+🚧 Projeto em desenvolvimento.# Biblioteca Escolar
+
+Aplicativo mobile desenvolvido em Flutter para auxiliar no gerenciamento da biblioteca escolar.
+
+## Objetivo
+
+O aplicativo tem como objetivo facilitar o cadastro de livros, alunos e o controle de empréstimos da biblioteca.
+
+## Funcionalidades planejadas
+
+- Cadastro de livros
+- Cadastro de alunos
+- Controle de empréstimos e devoluções
+- Leitura de código de barras/ISBN pela câmera
+- Consulta automática de informações de livros pelo ISBN
+
+## Tecnologias
+
+- Flutter
+- Dart
+
+## Status
+
+🚧 Projeto em desenvolvimento.
