@@ -1,10 +1,11 @@
+import 'tela_cadastro_livro.dart';
 import 'package:flutter/material.dart';
 
 class TelaLivros extends StatelessWidget {
   const TelaLivros({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext contextTelaLivros) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Livros'),
@@ -14,7 +15,14 @@ class TelaLivros extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                      contextTelaLivros,
+                      MaterialPageRoute(
+                          builder: (contextRotaTCL) => const TelaCadastroLivro()
+                      ),
+                  );
+                },
                 child: const Text('Cadastrar Livro'),
             ),
 
