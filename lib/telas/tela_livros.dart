@@ -9,8 +9,23 @@ class TelaLivros extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Livros'),
       ),
-      body: const Center(
-        child: Text('Tela de livros'),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+                onPressed: () {},
+                child: const Text('Cadastrar Livro'),
+            ),
+
+            const SizedBox(height: 20),
+
+            ElevatedButton(
+                onPressed: () {},
+                child: const Text('Listar Livros')
+            ),
+          ],
+        ),
       ),
     );
   }
