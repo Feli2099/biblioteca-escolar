@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:biblioteca_escolar/modelos/livro.dart';
 
 class TelaCadastroLivro extends StatefulWidget {
   const TelaCadastroLivro({super.key});
@@ -68,10 +69,17 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
                   final isbn = _isbnController.text;
                   final editora = _editoraController.text;
 
-                  print('Título: $titulo');
-                  print('Autor: $autor');
-                  print('ISBN: $isbn');
-                  print('Editora: $editora');
+                  final livro = Livro(
+                      titulo: titulo,
+                      autor: autor,
+                      isbn: isbn,
+                      editora: editora
+                  );
+
+                  print('Título: ${livro.titulo}');
+                  print('Autor: ${livro.autor}');
+                  print('ISBN: ${livro.isbn}');
+                  print('Editora: ${livro.editora}');
                 },
                 child: const Text("Cadastrar"),
             ),
