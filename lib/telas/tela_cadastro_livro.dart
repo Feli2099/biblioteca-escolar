@@ -16,6 +16,18 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
   final TextEditingController _isbnController = TextEditingController();
   final TextEditingController _editoraController = TextEditingController();
 
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  void dispose() {
+    _tituloController.dispose();
+    _autorController.dispose();
+    _isbnController.dispose();
+    _editoraController.dispose();
+
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext contextTelaCadastroLivro) {
     return Scaffold(
@@ -24,66 +36,103 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            TextField(
-              controller: _tituloController,
-              decoration: const InputDecoration(
-                labelText: 'Título',
-              ),
-            ),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              TextFormField(
+                controller: _tituloController,
+                decoration: const InputDecoration(
+                  labelText: 'Título',
+                ),
 
-            SizedBox(height: 16),
+                validator: (valor) {
+                  if (valor == null || valor.isEmpty) {
+                    return 'Informe o título';
+                  }
 
-            TextField(
-              controller: _autorController,
-              decoration: const InputDecoration(
-                labelText: 'Autor',
-              ),
-            ),
-
-            SizedBox(height: 16),
-
-            TextField(
-              controller: _isbnController,
-              decoration: const InputDecoration(
-                labelText: 'ISBN',
-              ),
-            ),
-
-            SizedBox(height: 16),
-
-            TextField(
-              controller: _editoraController,
-              decoration: const InputDecoration(
-                labelText: 'Editora',
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            ElevatedButton(
-                onPressed: () {
-                  final titulo = _tituloController.text;
-                  final autor = _autorController.text;
-                  final isbn = _isbnController.text;
-                  final editora = _editoraController.text;
-
-                  final livro = Livro(
-                      titulo: titulo,
-                      autor: autor,
-                      isbn: isbn,
-                      editora: editora
-                  );
-
-                  print('Título: ${livro.titulo}');
-                  print('Autor: ${livro.autor}');
-                  print('ISBN: ${livro.isbn}');
-                  print('Editora: ${livro.editora}');
+                  return null;
                 },
-                child: const Text("Cadastrar"),
-            ),
-          ],
+              ),
+
+              SizedBox(height: 16),
+
+              TextFormField(
+                controller: _autorController,
+                decoration: const InputDecoration(
+                  labelText: 'Autor',
+                ),
+
+                validator: (valor) {
+                  if (valor == null || valor.isEmpty) {
+                    return 'Informe o autor';
+                  }
+
+                  return null;
+                },
+              ),
+
+              SizedBox(height: 16),
+
+              TextFormField(
+                controller: _isbnController,
+                decoration: const InputDecoration(
+                  labelText: 'ISBN',
+                ),
+
+                validator: (valor) {
+                  if (valor == null || valor.isEmpty) {
+                    return 'Informe o ISBN';
+                  }
+
+                  return null;
+                },
+              ),
+
+              SizedBox(height: 16),
+
+              TextFormField(
+                controller: _editoraController,
+                decoration: const InputDecoration(
+                  labelText: 'Editora',
+                ),
+
+                validator: (valor) {
+                  if (valor == null || valor.isEmpty) {
+                    return 'Informe a Editora';
+                  }
+
+                  return null;
+                },
+              ),
+
+              const SizedBox(height: 24),
+
+              ElevatedButton(
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+                      final titulo = _tituloController.text;
+                      final autor = _autorController.text;
+                      final isbn = _isbnController.text;
+                      final editora = _editoraController.text;
+
+                      final livro = Livro(
+                          titulo: titulo,
+                          autor: autor,
+                          isbn: isbn,
+                          editora: editora
+                      );
+
+                      print('Título: ${livro.titulo}');
+                      print('Autor: ${livro.autor}');
+                      print('ISBN: ${livro.isbn}');
+                      print('Editora: ${livro.editora}');
+                    }
+                  },
+                  child: const Text("Cadastrar"),
+              ),
+            ],
+          ),
         ),
       )
     );
