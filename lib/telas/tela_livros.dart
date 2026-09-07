@@ -1,8 +1,18 @@
 import 'tela_cadastro_livro.dart';
 import 'package:flutter/material.dart';
+import 'package:biblioteca_escolar/modelos/livro.dart';
 
-class TelaLivros extends StatelessWidget {
+class TelaLivros extends StatefulWidget {
   const TelaLivros({super.key});
+
+  @override
+  State<TelaLivros> createState() {
+    return _TelaLivroState();
+  }
+}
+
+class _TelaLivroState extends State<TelaLivros> {
+  final List<Livro> _livros = [];
 
   @override
   Widget build(BuildContext contextTelaLivros) {
@@ -19,7 +29,11 @@ class TelaLivros extends StatelessWidget {
                   Navigator.push(
                       contextTelaLivros,
                       MaterialPageRoute(
-                          builder: (contextRotaTCL) => const TelaCadastroLivro()
+                          builder: (contextRotaCadastro) {
+                            return TelaCadastroLivro(
+                              livros: _livros,
+                            );
+                          },
                       ),
                   );
                 },

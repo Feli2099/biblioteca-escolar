@@ -2,7 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:biblioteca_escolar/modelos/livro.dart';
 
 class TelaCadastroLivro extends StatefulWidget {
-  const TelaCadastroLivro({super.key});
+  final List<Livro> livros;
+
+  const TelaCadastroLivro({
+    super.key,
+    required this.livros,
+  });
 
   @override
   State<TelaCadastroLivro> createState() {
@@ -186,6 +191,10 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
                           isbn: isbn,
                           editora: editora
                       );
+
+                      widget.livros.add(livro);
+                      
+                      print('Quantidade de livros: ${widget.livros.length}');
 
                       print('Título: ${livro.titulo}');
                       print('Autor: ${livro.autor}');
