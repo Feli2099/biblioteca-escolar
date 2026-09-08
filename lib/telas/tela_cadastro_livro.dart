@@ -112,7 +112,7 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
                 ),
 
                 validator: (valor) {
-                  if (valor == null || valor.isEmpty) {
+                  if (valor == null || valor.trim().isEmpty) {
                     return 'Informe o título';
                   }
 
@@ -129,7 +129,7 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
                 ),
 
                 validator: (valor) {
-                  if (valor == null || valor.isEmpty) {
+                  if (valor == null || valor.trim().isEmpty) {
                     return 'Informe o autor';
                   }
 
@@ -167,7 +167,7 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
                 ),
 
                 validator: (valor) {
-                  if (valor == null || valor.isEmpty) {
+                  if (valor == null || valor.trim().isEmpty) {
                     return 'Informe a Editora';
                   }
 
@@ -180,10 +180,10 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
               ElevatedButton(
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
-                      final titulo = _tituloController.text;
-                      final autor = _autorController.text;
-                      final isbn = _isbnController.text;
-                      final editora = _editoraController.text;
+                      final titulo = _tituloController.text.trim();
+                      final autor = _autorController.text.trim();
+                      final isbn = _isbnController.text.trim();
+                      final editora = _editoraController.text.trim();
 
                       final livro = Livro(
                           titulo: titulo,
