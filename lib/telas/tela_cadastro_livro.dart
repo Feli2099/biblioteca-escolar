@@ -194,6 +194,12 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
 
                       widget.onCadastrar(livro);
 
+                      ScaffoldMessenger.of(contextTelaCadastroLivro).showSnackBar(
+                        const SnackBar(
+                          content: Text('Livro cadastrado com sucesso!'),
+                        ),
+                      );
+
                       print('Título: ${livro.titulo}');
                       print('Autor: ${livro.autor}');
                       print('ISBN: ${livro.isbn}');
