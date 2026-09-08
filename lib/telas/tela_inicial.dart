@@ -1,8 +1,26 @@
 import 'package:flutter/material.dart';
 import 'tela_livros.dart';
+import 'package:biblioteca_escolar/modelos/livro.dart';
 
-class TelaInicial extends StatelessWidget {
+class TelaInicial extends StatefulWidget {
   const TelaInicial({super.key});
+
+  @override
+  State<TelaInicial> createState() {
+    return _TelaInicialState();
+  }
+}
+
+class _TelaInicialState extends State<TelaInicial> {
+  final List<Livro> _livros = [];
+
+  void _adicionarLivro(Livro livro) {
+    setState(() {
+      _livros.add(livro);
+    });
+
+    print('Quantidade de livros: ${_livros.length}');
+  }
 
   @override
   Widget build(BuildContext contextTelaInicial) {
@@ -19,6 +37,7 @@ class TelaInicial extends StatelessWidget {
               Icons.local_library,
               size: 80,
             ),
+
             const SizedBox(height: 20),
 
             const Text(
@@ -34,10 +53,15 @@ class TelaInicial extends StatelessWidget {
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
-                    contextTelaInicial,
-                    MaterialPageRoute(
-                        builder: (contextRotaTL) => const TelaLivros(),
-                    ),
+                  contextTelaInicial,
+                  MaterialPageRoute(
+                    builder: (contextoRotaLivros) {
+                      return TelaLivros(
+                        livros: _livros,
+                        onAdicionarLivro: _adicionarLivro,
+                      );
+                    },
+                  ),
                 );
               },
               child: const Text('Livros'),

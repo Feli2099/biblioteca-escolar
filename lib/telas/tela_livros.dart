@@ -3,7 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:biblioteca_escolar/modelos/livro.dart';
 
 class TelaLivros extends StatefulWidget {
-  const TelaLivros({super.key});
+  final List<Livro> livros;
+  final void Function(Livro) onAdicionarLivro;
+
+  const TelaLivros({
+    super.key,
+    required this.livros,
+    required this.onAdicionarLivro,
+  });
 
   @override
   State<TelaLivros> createState() {
@@ -12,8 +19,6 @@ class TelaLivros extends StatefulWidget {
 }
 
 class _TelaLivroState extends State<TelaLivros> {
-  final List<Livro> _livros = [];
-
   @override
   Widget build(BuildContext contextTelaLivros) {
     return Scaffold(
@@ -27,14 +32,14 @@ class _TelaLivroState extends State<TelaLivros> {
             ElevatedButton(
                 onPressed: () {
                   Navigator.push(
-                      contextTelaLivros,
-                      MaterialPageRoute(
-                          builder: (contextRotaCadastro) {
-                            return TelaCadastroLivro(
-                              livros: _livros,
-                            );
-                          },
-                      ),
+                    contextTelaLivros,
+                    MaterialPageRoute(
+                      builder: (contextRotaCadastro) {
+                        return TelaCadastroLivro(
+                          onCadastrar: widget.onAdicionarLivro,
+                        );
+                      },
+                    ),
                   );
                 },
                 child: const Text('Cadastrar Livro'),
