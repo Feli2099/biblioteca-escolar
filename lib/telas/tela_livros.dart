@@ -1,6 +1,7 @@
 import 'tela_cadastro_livro.dart';
 import 'package:flutter/material.dart';
 import 'package:biblioteca_escolar/modelos/livro.dart';
+import 'tela_listagem_livros.dart';
 
 class TelaLivros extends StatefulWidget {
   final List<Livro> livros;
@@ -48,8 +49,19 @@ class _TelaLivroState extends State<TelaLivros> {
             const SizedBox(height: 20),
 
             ElevatedButton(
-                onPressed: () {},
-                child: const Text('Listar Livros')
+                onPressed: () {
+                  Navigator.push(
+                    contextTelaLivros,
+                    MaterialPageRoute(
+                      builder: (contextRotaListagem) {
+                        return TelaListagemLivros(
+                          livros: widget.livros
+                        );
+                      },
+                    ),
+                  );
+                },
+                child: const Text('Listar Livros'),
             ),
           ],
         ),
