@@ -210,6 +210,11 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
                         ),
                       );
 
+                      _tituloController.clear();
+                      _autorController.clear();
+                      _isbnController.clear();
+                      _editoraController.clear();
+
                       print('Título: ${livro.titulo}');
                       print('Autor: ${livro.autor}');
                       print('ISBN: ${livro.isbn}');
