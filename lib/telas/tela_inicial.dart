@@ -14,12 +14,29 @@ class TelaInicial extends StatefulWidget {
 class _TelaInicialState extends State<TelaInicial> {
   final List<Livro> _livros = [];
 
-  void _adicionarLivro(Livro livro) {
+  bool _adicionarLivro(Livro livro) {
+    final isbnNovo = _normalizarIsbn(livro.isbn);
+
+    final isbnJaExiste = _livros.any(
+      (livroExistente) =>
+          _normalizarIsbn(livroExistente.isbn) == isbnNovo,
+    );
+
+    if (isbnJaExiste) {
+      return false;
+    }
+
     setState(() {
       _livros.add(livro);
     });
 
     print('Quantidade de livros: ${_livros.length}');
+
+    return true;
+  }
+
+  String _normalizarIsbn(String isbn) {
+    return isbn.replaceAll(RegExp(r'[\s-]'), '').toUpperCase();
   }
 
   @override

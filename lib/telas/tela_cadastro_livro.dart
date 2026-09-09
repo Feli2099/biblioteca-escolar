@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:biblioteca_escolar/modelos/livro.dart';
 
 class TelaCadastroLivro extends StatefulWidget {
-  final void Function(Livro) onCadastrar;
+  final bool Function(Livro) onCadastrar;
 
   const TelaCadastroLivro({
     super.key,
@@ -192,7 +192,17 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
                           editora: editora,
                       );
 
-                      widget.onCadastrar(livro);
+                      final cadastrado = widget.onCadastrar(livro);
+
+                      if (!cadastrado) {
+                        ScaffoldMessenger.of(contextTelaCadastroLivro).showSnackBar(
+                          const SnackBar(
+                              content: Text('Já existe um livro cadastrado com esse ISBN.'),
+                          ),
+                        );
+
+                        return;
+                      }
 
                       ScaffoldMessenger.of(contextTelaCadastroLivro).showSnackBar(
                         const SnackBar(

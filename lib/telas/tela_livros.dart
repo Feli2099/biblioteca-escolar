@@ -5,7 +5,7 @@ import 'tela_listagem_livros.dart';
 
 class TelaLivros extends StatefulWidget {
   final List<Livro> livros;
-  final void Function(Livro) onAdicionarLivro;
+  final bool Function(Livro) onAdicionarLivro;
 
   const TelaLivros({
     super.key,
