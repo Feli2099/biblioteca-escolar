@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:biblioteca_escolar/modelos/livro.dart';
+import 'package:biblioteca_escolar/servicos/google_books_service.dart';
 
 class TelaCadastroLivro extends StatefulWidget {
   final bool Function(Livro) onCadastrar;
@@ -22,6 +23,8 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
   final TextEditingController _editoraController = TextEditingController();
 
   final _formKey = GlobalKey<FormState>();
+
+  final GoogleBooksService _googleBooksService = GoogleBooksService();
 
   @override
   void dispose() {
@@ -173,6 +176,17 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
 
                   return null;
                 },
+              ),
+
+              const SizedBox(height: 24),
+
+              ElevatedButton(
+                  onPressed: () async {
+                    final dados = await _googleBooksService.buscarPorIsbn(
+                      _isbnController.text,
+                    );
+                  },
+                  child: const Text("Buscar ISBN"),
               ),
 
               const SizedBox(height: 24),
