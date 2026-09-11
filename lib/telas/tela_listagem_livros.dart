@@ -44,7 +44,9 @@ class TelaListagemLivros extends StatelessWidget {
 
                         Text('Autor: ${livro.autor}'),
                         Text('ISBN: ${livro.isbn}'),
-                        Text('Editora: ${livro.editora}'),
+
+                        if (livro.editora.trim().isNotEmpty)
+                          Text('Editora: ${livro.editora}'),
                       ],
                     ),
                   ),

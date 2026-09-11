@@ -168,23 +168,48 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
                 decoration: const InputDecoration(
                   labelText: 'Editora',
                 ),
-
-                validator: (valor) {
-                  if (valor == null || valor.trim().isEmpty) {
-                    return 'Informe a Editora';
-                  }
-
-                  return null;
-                },
               ),
 
               const SizedBox(height: 24),
 
               ElevatedButton(
                   onPressed: () async {
-                    final dados = await _googleBooksService.buscarPorIsbn(
-                      _isbnController.text,
-                    );
+                    final isbn = _isbnController.text.trim();
+
+                    if (!_isbnValido(isbn)) {
+                      ScaffoldMessenger.of(contextTelaCadastroLivro).showSnackBar(
+                        const SnackBar(
+                          content: Text('Informe um ISBN válido antes de buscar.'),
+                        ),
+                      );
+
+                      return;
+                    }
+
+                    final dados = await _googleBooksService.buscarPorIsbn(isbn);
+
+                    if (dados == null) {
+                      ScaffoldMessenger.of(contextTelaCadastroLivro).showSnackBar(
+                        const SnackBar(
+                          content: Text('Livro não encontrado. Preencha os dados manualmente'),
+                        ),
+                      );
+
+                      return;
+                    }
+
+                    final titulo = dados['title'];
+                    final autores = dados['authors'];
+                    final editora = dados['publisher'];
+
+                    _tituloController.text =
+                        titulo is String ? titulo : '';
+
+                    _autorController.text =
+                        autores is List ? autores.join(', ') : '';
+
+                    _editoraController.text =
+                        editora is String ? editora : '';
                   },
                   child: const Text("Buscar ISBN"),
               ),
