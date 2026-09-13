@@ -3,11 +3,13 @@ class Livro {
   final String autor;
   final String isbn;
   final String editora;
+  final String? urlCapa;
 
   Livro({
     required this.titulo,
     required this.autor,
     required this.isbn,
     required this.editora,
+    this.urlCapa,
   });
 }

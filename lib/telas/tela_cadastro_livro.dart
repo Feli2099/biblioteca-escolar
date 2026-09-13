@@ -21,6 +21,7 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
   final TextEditingController _autorController = TextEditingController();
   final TextEditingController _isbnController = TextEditingController();
   final TextEditingController _editoraController = TextEditingController();
+  String? _urlCapa;
 
   final _formKey = GlobalKey<FormState>();
 
@@ -201,6 +202,19 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
                     final titulo = dados['title'];
                     final autores = dados['authors'];
                     final editora = dados['publisher'];
+                    final imageLinks = dados['imageLinks'];
+
+                    String? urlCapa;
+
+                    if (imageLinks is Map<String,dynamic>) {
+                      final thumbnail = imageLinks['thumbnail'];
+
+                      if (thumbnail is String) {
+                        urlCapa = thumbnail;
+                      }
+                    }
+
+                    _urlCapa = urlCapa;
 
                     _tituloController.text =
                         titulo is String ? titulo : '';
@@ -225,10 +239,11 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
                       final editora = _editoraController.text.trim();
 
                       final livro = Livro(
-                          titulo: titulo,
-                          autor: autor,
-                          isbn: isbn,
-                          editora: editora,
+                        titulo: titulo,
+                        autor: autor,
+                        isbn: isbn,
+                        editora: editora,
+                        urlCapa: _urlCapa,
                       );
 
                       final cadastrado = widget.onCadastrar(livro);
@@ -253,6 +268,7 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
                       _autorController.clear();
                       _isbnController.clear();
                       _editoraController.clear();
+                      _urlCapa = null;
 
                       print('Título: ${livro.titulo}');
                       print('Autor: ${livro.autor}');
