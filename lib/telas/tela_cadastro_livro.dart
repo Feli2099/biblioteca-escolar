@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:biblioteca_escolar/modelos/livro.dart';
 import 'package:biblioteca_escolar/servicos/google_books_service.dart';
+import 'package:biblioteca_escolar/telas/tela_scanner_isbn.dart';
 
 class TelaCadastroLivro extends StatefulWidget {
   final bool Function(Livro) onCadastrar;
@@ -58,7 +59,7 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
 
     int soma = 0;
 
-    for (int i = 0; i <12; i++) {
+    for (int i = 0; i < 12; i++) {
       final digito = int.parse(isbn[i]);
 
       if (i % 2 == 0) {
@@ -68,7 +69,7 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
       }
     }
 
-    final digitoVerificador = (10 - (soma % 10)) %10;
+    final digitoVerificador = (10 - (soma % 10)) % 10;
 
     return digitoVerificador == int.parse(isbn[12]);
   }
@@ -80,7 +81,7 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
 
     int soma = 0;
 
-    for (int i = 0; i <9; i++) {
+    for (int i = 0; i < 9; i++) {
       final digito = int.parse(isbn[i]);
       soma += digito * (10 - i);
     }
@@ -88,13 +89,64 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
     final ultimoCaractere = isbn[9];
 
     final digitoVerificador =
-        ultimoCaractere.toUpperCase() == 'X'
-            ? 10
-            : int.parse(ultimoCaractere);
+    ultimoCaractere.toUpperCase() == 'X'
+        ? 10
+        : int.parse(ultimoCaractere);
 
     soma += digitoVerificador;
 
     return soma % 11 == 0;
+  }
+
+  Future<void> _buscarLivroPorIsbn(String isbn,
+      BuildContext contextTelaCadastroLivro,) async {
+    if (!_isbnValido(isbn)) {
+      ScaffoldMessenger.of(contextTelaCadastroLivro).showSnackBar(
+        const SnackBar(
+          content: Text('Informe um ISBN válido antes de buscar.'),
+        ),
+      );
+
+      return;
+    }
+
+    final dados = await _googleBooksService.buscarPorIsbn(isbn);
+
+    if (dados == null) {
+      ScaffoldMessenger.of(contextTelaCadastroLivro).showSnackBar(
+        const SnackBar(
+          content: Text('Livro não encontrado. Preencha os dados manualmente'),
+        ),
+      );
+
+      return;
+    }
+
+    final titulo = dados['title'];
+    final autores = dados['authors'];
+    final editora = dados['publisher'];
+    final imageLinks = dados['imageLinks'];
+
+    String? urlCapa;
+
+    if (imageLinks is Map<String, dynamic>) {
+      final thumbnail = imageLinks['thumbnail'];
+
+      if (thumbnail is String) {
+        urlCapa = thumbnail;
+      }
+    }
+
+    _urlCapa = urlCapa;
+
+    _tituloController.text =
+    titulo is String ? titulo : '';
+
+    _autorController.text =
+    autores is List ? autores.join(', ') : '';
+
+    _editoraController.text =
+    editora is String ? editora : '';
   }
 
   @override
@@ -103,185 +155,169 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
       appBar: AppBar(
         title: const Text('Cadastro de Livros'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              TextFormField(
-                controller: _tituloController,
-                decoration: const InputDecoration(
-                  labelText: 'Título',
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                TextFormField(
+                  controller: _tituloController,
+                  decoration: const InputDecoration(
+                    labelText: 'Título',
+                  ),
+
+                  validator: (valor) {
+                    if (valor == null || valor.trim().isEmpty) {
+                      return 'Informe o título';
+                    }
+
+                    return null;
+                  },
                 ),
 
-                validator: (valor) {
-                  if (valor == null || valor.trim().isEmpty) {
-                    return 'Informe o título';
-                  }
+                SizedBox(height: 16),
 
-                  return null;
-                },
-              ),
+                TextFormField(
+                  controller: _autorController,
+                  decoration: const InputDecoration(
+                    labelText: 'Autor',
+                  ),
 
-              SizedBox(height: 16),
+                  validator: (valor) {
+                    if (valor == null || valor.trim().isEmpty) {
+                      return 'Informe o autor';
+                    }
 
-              TextFormField(
-                controller: _autorController,
-                decoration: const InputDecoration(
-                  labelText: 'Autor',
+                    return null;
+                  },
                 ),
 
-                validator: (valor) {
-                  if (valor == null || valor.trim().isEmpty) {
-                    return 'Informe o autor';
-                  }
+                SizedBox(height: 16),
 
-                  return null;
-                },
-              ),
+                TextFormField(
+                  controller: _isbnController,
+                  decoration: const InputDecoration(
+                    labelText: 'ISBN',
+                  ),
 
-              SizedBox(height: 16),
+                  validator: (valor) {
+                    if (valor == null || valor.trim().isEmpty) {
+                      return 'Informe o ISBN';
+                    }
 
-              TextFormField(
-                controller: _isbnController,
-                decoration: const InputDecoration(
-                  labelText: 'ISBN',
+                    if (!_isbnValido(valor)) {
+                      return 'Informe um ISBN válido';
+                    }
+
+                    return null;
+                  },
                 ),
 
-                validator: (valor) {
-                  if (valor == null || valor.trim().isEmpty) {
-                    return 'Informe o ISBN';
-                  }
+                const SizedBox(height: 8),
 
-                  if (!_isbnValido(valor)) {
-                    return 'Informe um ISBN válido';
-                  }
+                ElevatedButton(
+                  onPressed: () async {
+                    final codigo = await Navigator.push<String>(
+                      contextTelaCadastroLivro,
+                      MaterialPageRoute(
+                        builder: (contextRotaScanner) => const TelaScannerIsbn(),
+                      ),
+                    );
 
-                  return null;
-                },
-              ),
+                    if (codigo == null) {
+                      return;
+                    }
 
-              SizedBox(height: 16),
+                    _isbnController.text = codigo;
 
-              TextFormField(
-                controller: _editoraController,
-                decoration: const InputDecoration(
-                  labelText: 'Editora',
+                    await _buscarLivroPorIsbn(
+                      codigo,
+                      contextTelaCadastroLivro
+                    );
+                  },
+                    child: const Text('Escanear ISBN'),
                 ),
-              ),
 
-              const SizedBox(height: 24),
+                SizedBox(height: 16),
 
-              ElevatedButton(
+                TextFormField(
+                  controller: _editoraController,
+                  decoration: const InputDecoration(
+                    labelText: 'Editora',
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                ElevatedButton(
                   onPressed: () async {
                     final isbn = _isbnController.text.trim();
 
-                    if (!_isbnValido(isbn)) {
-                      ScaffoldMessenger.of(contextTelaCadastroLivro).showSnackBar(
-                        const SnackBar(
-                          content: Text('Informe um ISBN válido antes de buscar.'),
-                        ),
-                      );
-
-                      return;
-                    }
-
-                    final dados = await _googleBooksService.buscarPorIsbn(isbn);
-
-                    if (dados == null) {
-                      ScaffoldMessenger.of(contextTelaCadastroLivro).showSnackBar(
-                        const SnackBar(
-                          content: Text('Livro não encontrado. Preencha os dados manualmente'),
-                        ),
-                      );
-
-                      return;
-                    }
-
-                    final titulo = dados['title'];
-                    final autores = dados['authors'];
-                    final editora = dados['publisher'];
-                    final imageLinks = dados['imageLinks'];
-
-                    String? urlCapa;
-
-                    if (imageLinks is Map<String,dynamic>) {
-                      final thumbnail = imageLinks['thumbnail'];
-
-                      if (thumbnail is String) {
-                        urlCapa = thumbnail;
-                      }
-                    }
-
-                    _urlCapa = urlCapa;
-
-                    _tituloController.text =
-                        titulo is String ? titulo : '';
-
-                    _autorController.text =
-                        autores is List ? autores.join(', ') : '';
-
-                    _editoraController.text =
-                        editora is String ? editora : '';
+                    await _buscarLivroPorIsbn(
+                      isbn,
+                      contextTelaCadastroLivro,
+                    );
                   },
-                  child: const Text("Buscar ISBN"),
-              ),
+                  child: const Text('Buscar ISBN'),
+                ),
 
-              const SizedBox(height: 24),
+                const SizedBox(height: 24),
 
-              ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      final titulo = _tituloController.text.trim();
-                      final autor = _autorController.text.trim();
-                      final isbn = _isbnController.text.trim();
-                      final editora = _editoraController.text.trim();
+                ElevatedButton(
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        final titulo = _tituloController.text.trim();
+                        final autor = _autorController.text.trim();
+                        final isbn = _isbnController.text.trim();
+                        final editora = _editoraController.text.trim();
 
-                      final livro = Livro(
-                        titulo: titulo,
-                        autor: autor,
-                        isbn: isbn,
-                        editora: editora,
-                        urlCapa: _urlCapa,
-                      );
+                        final livro = Livro(
+                          titulo: titulo,
+                          autor: autor,
+                          isbn: isbn,
+                          editora: editora,
+                          urlCapa: _urlCapa,
+                        );
 
-                      final cadastrado = widget.onCadastrar(livro);
+                        final cadastrado = widget.onCadastrar(livro);
 
-                      if (!cadastrado) {
+                        if (!cadastrado) {
+                          ScaffoldMessenger.of(contextTelaCadastroLivro).showSnackBar(
+                            const SnackBar(
+                                content: Text('Já existe um livro cadastrado com esse ISBN.'),
+                            ),
+                          );
+
+                          return;
+                        }
+
                         ScaffoldMessenger.of(contextTelaCadastroLivro).showSnackBar(
                           const SnackBar(
-                              content: Text('Já existe um livro cadastrado com esse ISBN.'),
+                            content: Text('Livro cadastrado com sucesso!'),
                           ),
                         );
 
-                        return;
+                        _tituloController.clear();
+                        _autorController.clear();
+                        _isbnController.clear();
+                        _editoraController.clear();
+                        _urlCapa = null;
+
+                        print('Título: ${livro.titulo}');
+                        print('Autor: ${livro.autor}');
+                        print('ISBN: ${livro.isbn}');
+                        print('Editora: ${livro.editora}');
                       }
-
-                      ScaffoldMessenger.of(contextTelaCadastroLivro).showSnackBar(
-                        const SnackBar(
-                          content: Text('Livro cadastrado com sucesso!'),
-                        ),
-                      );
-
-                      _tituloController.clear();
-                      _autorController.clear();
-                      _isbnController.clear();
-                      _editoraController.clear();
-                      _urlCapa = null;
-
-                      print('Título: ${livro.titulo}');
-                      print('Autor: ${livro.autor}');
-                      print('ISBN: ${livro.isbn}');
-                      print('Editora: ${livro.editora}');
-                    }
-                  },
-                  child: const Text("Cadastrar"),
-              ),
-            ],
+                    },
+                    child: const Text("Cadastrar"),
+                ),
+              ],
+            ),
           ),
         ),
-      )
+      ),
     );
   }
 }
