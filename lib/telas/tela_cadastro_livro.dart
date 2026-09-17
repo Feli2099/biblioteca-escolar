@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:biblioteca_escolar/modelos/livro.dart';
 import 'package:biblioteca_escolar/servicos/google_books_service.dart';
+import 'package:biblioteca_escolar/servicos/open_library_service.dart';
 import 'package:biblioteca_escolar/telas/tela_scanner_isbn.dart';
 
 class TelaCadastroLivro extends StatefulWidget {
@@ -27,6 +28,7 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
   final _formKey = GlobalKey<FormState>();
 
   final GoogleBooksService _googleBooksService = GoogleBooksService();
+  final OpenLibraryService _openLibraryService = OpenLibraryService();
 
   @override
   void dispose() {
@@ -110,9 +112,11 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
       return;
     }
 
-    final dados = await _googleBooksService.buscarPorIsbn(isbn);
+    final dadosGoogle = await _googleBooksService.buscarPorIsbn(isbn);
 
-    if (dados == null) {
+    final dadosOpenLibrary = await _openLibraryService.buscarPorIsbn(isbn);
+
+    if (dadosGoogle == null && dadosOpenLibrary == null) {
       ScaffoldMessenger.of(contextTelaCadastroLivro).showSnackBar(
         const SnackBar(
           content: Text('Livro não encontrado. Preencha os dados manualmente'),
@@ -122,31 +126,109 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
       return;
     }
 
-    final titulo = dados['title'];
-    final autores = dados['authors'];
-    final editora = dados['publisher'];
-    final imageLinks = dados['imageLinks'];
+    print('Google Books: $dadosGoogle');
+    print('Open Library: $dadosOpenLibrary');
 
-    String? urlCapa;
+    String? titulo;
 
-    if (imageLinks is Map<String, dynamic>) {
-      final thumbnail = imageLinks['thumbnail'];
+    if (dadosGoogle != null) {
+      final tituloGoogle = dadosGoogle['title'];
 
-      if (thumbnail is String) {
-        urlCapa = thumbnail;
+      if (tituloGoogle is String) {
+        titulo = tituloGoogle;
       }
     }
 
+    if (titulo == null && dadosOpenLibrary != null) {
+      final tituloOpenLibrary = dadosOpenLibrary['title'];
+
+      if (tituloOpenLibrary is String) {
+        titulo = tituloOpenLibrary;
+      }
+    }
+
+    String? autor;
+
+    if (dadosGoogle != null) {
+      final autoresGoogle = dadosGoogle['authors'];
+
+      if (autoresGoogle is List && autoresGoogle.isNotEmpty) {
+        autor = autoresGoogle.join(', ');
+      }
+    }
+
+    if (autor == null && dadosOpenLibrary != null) {
+      final autoresOpenLibrary = dadosOpenLibrary['authors'];
+
+      if (autoresOpenLibrary is List &&
+          autoresOpenLibrary.isNotEmpty) {
+        final primeiroAutor = autoresOpenLibrary.first;
+
+        if (primeiroAutor is Map<String, dynamic>) {
+          final chaveAutor = primeiroAutor['key'];
+
+          if (chaveAutor is String) {
+            autor = await _openLibraryService.buscarNomeAutor(
+              chaveAutor,
+            );
+          }
+        }
+      }
+    }
+
+    String? editora;
+
+    if (dadosGoogle != null) {
+      final editoraGoogle = dadosGoogle['publisher'];
+
+      if (editoraGoogle is String && editoraGoogle.isNotEmpty) {
+        editora = editoraGoogle;
+      }
+    }
+
+    if (editora == null && dadosOpenLibrary != null) {
+      final editorasOpenLibrary = dadosOpenLibrary['publishers'];
+
+      if (editorasOpenLibrary is List && editorasOpenLibrary.isNotEmpty) {
+        final primeiraEditora = editorasOpenLibrary.first;
+
+        if (primeiraEditora is String) {
+          editora = primeiraEditora;
+        }
+      }
+    }
+
+    String? urlCapa;
+
+    if (dadosGoogle != null) {
+      final imageLinks = dadosGoogle['imageLinks'];
+
+      if (imageLinks is Map<String, dynamic>) {
+        final thumbnail = imageLinks['thumbnail'];
+
+        if (thumbnail is String && thumbnail.isNotEmpty) {
+          urlCapa = thumbnail;
+        }
+      }
+    }
+
+    if (urlCapa == null && dadosOpenLibrary != null) {
+      final capasOpenLibrary = dadosOpenLibrary['covers'];
+
+      if (capasOpenLibrary is List && capasOpenLibrary.isNotEmpty) {
+        final primeiraCapa = capasOpenLibrary.first;
+
+        if (primeiraCapa is int) {
+          urlCapa = 'https://covers.openlibrary.org/b/id/$primeiraCapa-M.jpg';
+        }
+      }
+    }
+
+    _tituloController.text = titulo ?? '';
+    _autorController.text = autor ?? '';
+    _editoraController.text = editora ?? '';
     _urlCapa = urlCapa;
 
-    _tituloController.text =
-    titulo is String ? titulo : '';
-
-    _autorController.text =
-    autores is List ? autores.join(', ') : '';
-
-    _editoraController.text =
-    editora is String ? editora : '';
   }
 
   @override
