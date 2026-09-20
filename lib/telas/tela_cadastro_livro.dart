@@ -3,6 +3,7 @@ import 'package:biblioteca_escolar/modelos/livro.dart';
 import 'package:biblioteca_escolar/servicos/google_books_service.dart';
 import 'package:biblioteca_escolar/servicos/open_library_service.dart';
 import 'package:biblioteca_escolar/telas/tela_scanner_isbn.dart';
+import 'package:biblioteca_escolar/servicos/firestore_livros_service.dart';
 
 class TelaCadastroLivro extends StatefulWidget {
   final bool Function(Livro) onCadastrar;
@@ -29,6 +30,7 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
 
   final GoogleBooksService _googleBooksService = GoogleBooksService();
   final OpenLibraryService _openLibraryService = OpenLibraryService();
+  final FirestoreLivrosService _firestoreLivrosService = FirestoreLivrosService();
 
   @override
   void dispose() {
@@ -348,52 +350,64 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
                 const SizedBox(height: 24),
 
                 ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        final titulo = _tituloController.text.trim();
-                        final autor = _autorController.text.trim();
-                        final isbn = _isbnController.text.trim();
-                        final editora = _editoraController.text.trim();
+                  onPressed: () async {
+                    if (_formKey.currentState!.validate()) {
+                      final titulo = _tituloController.text.trim();
+                      final autor = _autorController.text.trim();
+                      final isbn = _isbnController.text.trim();
+                      final editora = _editoraController.text.trim();
 
-                        final livro = Livro(
-                          titulo: titulo,
-                          autor: autor,
-                          isbn: isbn,
-                          editora: editora,
-                          urlCapa: _urlCapa,
-                        );
+                      final livro = Livro(
+                        titulo: titulo,
+                        autor: autor,
+                        isbn: isbn,
+                        editora: editora,
+                        urlCapa: _urlCapa,
+                      );
 
-                        final cadastrado = widget.onCadastrar(livro);
+                      final cadastrado = widget.onCadastrar(livro);
 
-                        if (!cadastrado) {
-                          ScaffoldMessenger.of(contextTelaCadastroLivro).showSnackBar(
-                            const SnackBar(
-                                content: Text('Já existe um livro cadastrado com esse ISBN.'),
-                            ),
-                          );
-
-                          return;
-                        }
-
+                      if (!cadastrado) {
                         ScaffoldMessenger.of(contextTelaCadastroLivro).showSnackBar(
                           const SnackBar(
-                            content: Text('Livro cadastrado com sucesso!'),
+                            content: Text('Já existe um livro cadastrado com esse ISBN.'),
                           ),
                         );
 
-                        _tituloController.clear();
-                        _autorController.clear();
-                        _isbnController.clear();
-                        _editoraController.clear();
-                        _urlCapa = null;
-
-                        print('Título: ${livro.titulo}');
-                        print('Autor: ${livro.autor}');
-                        print('ISBN: ${livro.isbn}');
-                        print('Editora: ${livro.editora}');
+                        return;
                       }
-                    },
-                    child: const Text("Cadastrar"),
+
+                      try {
+                        await _firestoreLivrosService.adicionarLivro(livro);
+                      } catch(erro) {
+                        ScaffoldMessenger.of(contextTelaCadastroLivro).showSnackBar(
+                          const SnackBar(
+                            content: Text('Erro ao salvar o livro no banco de dados.'),
+                          ),
+                        );
+
+                        return;
+                      }
+
+                      ScaffoldMessenger.of(contextTelaCadastroLivro).showSnackBar(
+                        const SnackBar(
+                          content: Text('Livro cadastrado com sucesso!'),
+                        ),
+                      );
+
+                      _tituloController.clear();
+                      _autorController.clear();
+                      _isbnController.clear();
+                      _editoraController.clear();
+                      _urlCapa = null;
+
+                      print('Título: ${livro.titulo}');
+                      print('Autor: ${livro.autor}');
+                      print('ISBN: ${livro.isbn}');
+                      print('Editora: ${livro.editora}');
+                    }
+                  },
+                  child: const Text("Cadastrar"),
                 ),
               ],
             ),

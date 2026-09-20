@@ -12,4 +12,24 @@ class Livro {
     required this.editora,
     this.urlCapa,
   });
+
+  Map<String,dynamic> toMap() {
+    return {
+      'titulo': titulo,
+      'autor': autor,
+      'isbn': isbn,
+      'editora': editora,
+      'urlCapa': urlCapa,
+    };
+  }
+
+  factory Livro.fromMap(Map<String,dynamic> map) {
+    return Livro(
+      titulo: map['titulo'] ?? '',
+      autor: map['autor'] ?? '',
+      isbn: map['isbn'] ?? '',
+      editora: map['editora'] ?? '',
+      urlCapa: map['urlCapa'],
+    );
+  }
 }

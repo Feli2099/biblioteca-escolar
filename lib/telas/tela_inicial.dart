@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'tela_livros.dart';
 import 'package:biblioteca_escolar/modelos/livro.dart';
+import 'package:biblioteca_escolar/servicos/firestore_livros_service.dart';
 
 class TelaInicial extends StatefulWidget {
   const TelaInicial({super.key});
@@ -13,6 +14,8 @@ class TelaInicial extends StatefulWidget {
 
 class _TelaInicialState extends State<TelaInicial> {
   final List<Livro> _livros = [];
+
+  final FirestoreLivrosService _firestoreLivrosService = FirestoreLivrosService();
 
   bool _adicionarLivro(Livro livro) {
     final isbnNovo = _normalizarIsbn(livro.isbn);
@@ -37,6 +40,26 @@ class _TelaInicialState extends State<TelaInicial> {
 
   String _normalizarIsbn(String isbn) {
     return isbn.replaceAll(RegExp(r'[\s-]'), '').toUpperCase();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    _carregarLivros();
+  }
+
+  Future<void> _carregarLivros() async {
+    final livrosSalvos = await _firestoreLivrosService.buscarLivros();
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _livros.clear();
+      _livros.addAll(livrosSalvos);
+    });
   }
 
   @override
