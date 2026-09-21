@@ -17,23 +17,20 @@ class _TelaInicialState extends State<TelaInicial> {
 
   final FirestoreLivrosService _firestoreLivrosService = FirestoreLivrosService();
 
-  bool _adicionarLivro(Livro livro) {
+  Future<bool> _adicionarLivro(Livro livro) async {
     final isbnNovo = _normalizarIsbn(livro.isbn);
 
     final isbnJaExiste = _livros.any(
-      (livroExistente) =>
-          _normalizarIsbn(livroExistente.isbn) == isbnNovo,
+      (livroExistente) => _normalizarIsbn(livroExistente.isbn) == isbnNovo,
     );
 
     if (isbnJaExiste) {
       return false;
     }
 
-    setState(() {
-      _livros.add(livro);
-    });
+    await _firestoreLivrosService.adicionarLivro(livro);
 
-    print('Quantidade de livros: ${_livros.length}');
+    await _carregarLivros();
 
     return true;
   }

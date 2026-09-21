@@ -3,10 +3,9 @@ import 'package:biblioteca_escolar/modelos/livro.dart';
 import 'package:biblioteca_escolar/servicos/google_books_service.dart';
 import 'package:biblioteca_escolar/servicos/open_library_service.dart';
 import 'package:biblioteca_escolar/telas/tela_scanner_isbn.dart';
-import 'package:biblioteca_escolar/servicos/firestore_livros_service.dart';
 
 class TelaCadastroLivro extends StatefulWidget {
-  final bool Function(Livro) onCadastrar;
+  final Future<bool> Function(Livro) onCadastrar;
 
   const TelaCadastroLivro({
     super.key,
@@ -30,7 +29,6 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
 
   final GoogleBooksService _googleBooksService = GoogleBooksService();
   final OpenLibraryService _openLibraryService = OpenLibraryService();
-  final FirestoreLivrosService _firestoreLivrosService = FirestoreLivrosService();
 
   @override
   void dispose() {
@@ -365,20 +363,18 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
                         urlCapa: _urlCapa,
                       );
 
-                      final cadastrado = widget.onCadastrar(livro);
-
-                      if (!cadastrado) {
-                        ScaffoldMessenger.of(contextTelaCadastroLivro).showSnackBar(
-                          const SnackBar(
-                            content: Text('Já existe um livro cadastrado com esse ISBN.'),
-                          ),
-                        );
-
-                        return;
-                      }
-
                       try {
-                        await _firestoreLivrosService.adicionarLivro(livro);
+                        final cadastrado = await widget.onCadastrar(livro);
+
+                        if (!cadastrado) {
+                          ScaffoldMessenger.of(contextTelaCadastroLivro).showSnackBar(
+                            const SnackBar(
+                              content: Text('Já existe um livro cadastrado com esse ISBN.'),
+                            ),
+                          );
+
+                          return;
+                        }
                       } catch(erro) {
                         ScaffoldMessenger.of(contextTelaCadastroLivro).showSnackBar(
                           const SnackBar(

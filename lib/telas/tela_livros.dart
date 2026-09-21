@@ -5,7 +5,7 @@ import 'tela_listagem_livros.dart';
 
 class TelaLivros extends StatefulWidget {
   final List<Livro> livros;
-  final bool Function(Livro) onAdicionarLivro;
+  final Future<bool> Function(Livro) onAdicionarLivro;
 
   const TelaLivros({
     super.key,
@@ -31,19 +31,19 @@ class _TelaLivroState extends State<TelaLivros> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    contextTelaLivros,
-                    MaterialPageRoute(
-                      builder: (contextRotaCadastro) {
-                        return TelaCadastroLivro(
-                          onCadastrar: widget.onAdicionarLivro,
-                        );
-                      },
-                    ),
-                  );
-                },
-                child: const Text('Cadastrar Livro'),
+              onPressed: () {
+                Navigator.push(
+                  contextTelaLivros,
+                  MaterialPageRoute(
+                    builder: (contextRotaCadastro) {
+                      return TelaCadastroLivro(
+                        onCadastrar: widget.onAdicionarLivro,
+                      );
+                    },
+                  ),
+                );
+              },
+              child: const Text('Cadastrar Livro'),
             ),
 
             const SizedBox(height: 20),
