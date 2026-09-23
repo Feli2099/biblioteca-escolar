@@ -18,25 +18,15 @@ class _TelaInicialState extends State<TelaInicial> {
   final FirestoreLivrosService _firestoreLivrosService = FirestoreLivrosService();
 
   Future<bool> _adicionarLivro(Livro livro) async {
-    final isbnNovo = _normalizarIsbn(livro.isbn);
+    final cadastrado = await _firestoreLivrosService.adicionarLivro(livro);
 
-    final isbnJaExiste = _livros.any(
-      (livroExistente) => _normalizarIsbn(livroExistente.isbn) == isbnNovo,
-    );
-
-    if (isbnJaExiste) {
+    if (!cadastrado) {
       return false;
     }
-
-    await _firestoreLivrosService.adicionarLivro(livro);
 
     await _carregarLivros();
 
     return true;
-  }
-
-  String _normalizarIsbn(String isbn) {
-    return isbn.replaceAll(RegExp(r'[\s-]'), '').toUpperCase();
   }
 
   @override
