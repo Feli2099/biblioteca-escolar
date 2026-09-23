@@ -45,6 +45,24 @@ class _TelaInicialState extends State<TelaInicial> {
     return true;
   }
 
+  Future<void> _excluirLivro(String isbn) async {
+    await _firestoreLivrosService.excluirLivro(isbn);
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _livros.removeWhere(
+          (livro) => _normalizarIsbn(livro.isbn) == _normalizarIsbn(isbn),
+      );
+    });
+  }
+
+  String _normalizarIsbn(String isbn) {
+    return isbn.replaceAll(RegExp(r'[\s-]'), '').toUpperCase();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -153,6 +171,7 @@ class _TelaInicialState extends State<TelaInicial> {
                         return TelaLivros(
                           livros: _livros,
                           onAdicionarLivro: _adicionarLivro,
+                          onExcluirLivro: _excluirLivro,
                         );
                       },
                     ),

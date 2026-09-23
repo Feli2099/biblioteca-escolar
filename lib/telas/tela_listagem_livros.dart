@@ -1,13 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:biblioteca_escolar/modelos/livro.dart';
 
-class TelaListagemLivros extends StatelessWidget {
+class TelaListagemLivros extends StatefulWidget {
   final List<Livro> livros;
+  final Future<void> Function(String) onExcluirLivro;
 
   const TelaListagemLivros({
     super.key,
     required this.livros,
-});
+    required this.onExcluirLivro,
+  });
+
+  @override
+  State<TelaListagemLivros> createState() {
+    return _TelaListagemLivrosState();
+  }
+}
+
+class _TelaListagemLivrosState extends State<TelaListagemLivros> {
 
   @override
   Widget build(BuildContext context) {
@@ -15,17 +25,18 @@ class TelaListagemLivros extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Livros Cadastrados'),
       ),
-      body: livros.isEmpty
+      body: widget.livros.isEmpty
           ? const Center(
               child: Text('Nenhum livro cadastrado.'),
             )
           : ListView.builder(
               padding: const EdgeInsets.all(16),
-              itemCount: livros.length,
+              itemCount: widget.livros.length,
               itemBuilder: (contextoItem, indice) {
-                final livro = livros[indice];
+                final livro = widget.livros[indice];
 
                 return Card(
+                  key: ValueKey(livro.isbn),
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Row(
@@ -45,6 +56,7 @@ class TelaListagemLivros extends StatelessWidget {
                             clipBehavior: Clip.antiAlias,
                             child: Image.network(
                               livro.urlCapa!,
+                              key: ValueKey(livro.urlCapa),
                               fit: BoxFit.cover,
                               webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
                               errorBuilder: (
@@ -101,6 +113,75 @@ class TelaListagemLivros extends StatelessWidget {
                               if (livro.editora.trim().isNotEmpty)
                                 Text('Editora: ${livro.editora}'),
                             ],
+                          ),
+                        ),
+
+                        IconButton(
+                          onPressed: () async {
+                            final confirmar = await showDialog<bool>(
+                              context: context,
+                              builder: (contextoDialogo) {
+                                return AlertDialog(
+                                  title: const Text('Excluir livro'),
+                                  content: Text('Deseja excluir "${livro.titulo}"?'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(
+                                          contextoDialogo,
+                                          false,
+                                        );
+                                      },
+                                      child: const Text('Cancelar'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(
+                                          contextoDialogo,
+                                          true
+                                        );
+                                      },
+                                      child: const Text('Excluir'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+
+                            if (confirmar != true) {
+                              return;
+                            }
+
+                            try {
+                              await widget.onExcluirLivro(
+                                livro.isbn,
+                              );
+
+                              if (!mounted) {
+                                return;
+                              }
+
+                              setState(() {});
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Livro excluído com sucesso!'),
+                                ),
+                              );
+                            } catch (erro) {
+                              if (!mounted) {
+                                return;
+                              }
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Erro ao excluir o livro.'),
+                                ),
+                              );
+                            }
+                          },
+                          icon: const Icon(
+                            Icons.delete_outline,
                           ),
                         ),
                       ],

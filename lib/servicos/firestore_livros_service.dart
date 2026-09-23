@@ -35,4 +35,10 @@ class FirestoreLivrosService {
     }
     ).toList();
   }
+
+  Future<void> excluirLivro(String isbn) async {
+    final isbnNormalizado = _normalizarIsbn(isbn);
+
+    await _firestore.collection('livros').doc(isbnNormalizado).delete();
+  }
 }

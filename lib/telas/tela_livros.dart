@@ -6,11 +6,13 @@ import 'tela_listagem_livros.dart';
 class TelaLivros extends StatefulWidget {
   final List<Livro> livros;
   final Future<bool> Function(Livro) onAdicionarLivro;
+  final Future<void> Function(String) onExcluirLivro;
 
   const TelaLivros({
     super.key,
     required this.livros,
     required this.onAdicionarLivro,
+    required this.onExcluirLivro,
   });
 
   @override
@@ -49,19 +51,20 @@ class _TelaLivroState extends State<TelaLivros> {
             const SizedBox(height: 20),
 
             ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    contextTelaLivros,
-                    MaterialPageRoute(
-                      builder: (contextRotaListagem) {
-                        return TelaListagemLivros(
-                          livros: widget.livros
-                        );
-                      },
-                    ),
-                  );
-                },
-                child: const Text('Listar Livros'),
+              onPressed: () {
+                Navigator.push(
+                  contextTelaLivros,
+                  MaterialPageRoute(
+                    builder: (contextRotaListagem) {
+                      return TelaListagemLivros(
+                        livros: widget.livros,
+                        onExcluirLivro: widget.onExcluirLivro,
+                      );
+                    },
+                  ),
+                );
+              },
+              child: const Text('Listar Livros'),
             ),
           ],
         ),
