@@ -15,6 +15,9 @@ class TelaInicial extends StatefulWidget {
 class _TelaInicialState extends State<TelaInicial> {
   final List<Livro> _livros = [];
 
+  bool _carregandoLivros = true;
+  String? _erroCarregamento;
+
   final FirestoreLivrosService _firestoreLivrosService = FirestoreLivrosService();
 
   Future<bool> _adicionarLivro(Livro livro) async {
@@ -24,7 +27,20 @@ class _TelaInicialState extends State<TelaInicial> {
       return false;
     }
 
-    await _carregarLivros();
+    try {
+      await _carregarLivros();
+    } catch (erro) {
+      if (mounted) {
+        setState(() {
+          _livros.add(livro);
+        });
+      }
+
+      print(
+        'Livro salvo no Firestore, '
+        'mas a lista não pôde ser atualizada: $erro',
+      );
+    }
 
     return true;
   }
@@ -33,7 +49,7 @@ class _TelaInicialState extends State<TelaInicial> {
   void initState() {
     super.initState();
 
-    _carregarLivros();
+    _carregarLivrosInicial();
   }
 
   Future<void> _carregarLivros() async {
@@ -47,6 +63,35 @@ class _TelaInicialState extends State<TelaInicial> {
       _livros.clear();
       _livros.addAll(livrosSalvos);
     });
+  }
+
+  Future<void> _carregarLivrosInicial() async {
+    if (mounted) {
+      setState(() {
+        _carregandoLivros = true;
+        _erroCarregamento = null;
+      });
+    }
+
+    try {
+      await _carregarLivros();
+    } catch (erro) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _erroCarregamento = 'Não foi possível carregar os livros.';
+      });
+    } finally {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _carregandoLivros = false;
+      });
+    }
   }
 
   @override
@@ -77,21 +122,43 @@ class _TelaInicialState extends State<TelaInicial> {
 
             const SizedBox(height: 40),
 
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  contextTelaInicial,
-                  MaterialPageRoute(
-                    builder: (contextoRotaLivros) {
-                      return TelaLivros(
-                        livros: _livros,
-                        onAdicionarLivro: _adicionarLivro,
-                      );
-                    },
+            if (_carregandoLivros)
+              const Padding(
+                padding: EdgeInsets.only(bottom: 16),
+                child: CircularProgressIndicator(),
+              ),
+
+            if (_erroCarregamento != null)
+              Column(
+                children: [
+                  Text(_erroCarregamento!),
+                  
+                  TextButton(
+                      onPressed: _carregarLivrosInicial,
+                      child: const Text('Tentar Novamente'),
                   ),
-                );
-              },
-              child: const Text('Livros'),
+
+                  const SizedBox(height: 16),
+                ],
+              ),
+
+            ElevatedButton(
+              onPressed: _carregandoLivros
+                ? null
+                : () {
+                  Navigator.push(
+                    contextTelaInicial,
+                    MaterialPageRoute(
+                      builder: (contextoRotaLivros) {
+                        return TelaLivros(
+                          livros: _livros,
+                          onAdicionarLivro: _adicionarLivro,
+                        );
+                      },
+                    ),
+                  );
+                },
+                child: const Text('Livros'),
             ),
 
             const SizedBox(height: 15),
