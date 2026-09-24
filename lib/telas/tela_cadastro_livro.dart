@@ -100,8 +100,7 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
     return soma % 11 == 0;
   }
 
-  Future<void> _buscarLivroPorIsbn(String isbn,
-      BuildContext contextTelaCadastroLivro,) async {
+  Future<void> _buscarLivroPorIsbn(String isbn, BuildContext contextTelaCadastroLivro,) async {
     if (!_isbnValido(isbn)) {
       ScaffoldMessenger.of(contextTelaCadastroLivro).showSnackBar(
         const SnackBar(
@@ -116,6 +115,10 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
 
     final dadosOpenLibrary = await _openLibraryService.buscarPorIsbn(isbn);
 
+    if (!contextTelaCadastroLivro.mounted) {
+      return;
+    }
+
     if (dadosGoogle == null && dadosOpenLibrary == null) {
       ScaffoldMessenger.of(contextTelaCadastroLivro).showSnackBar(
         const SnackBar(
@@ -125,9 +128,6 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
 
       return;
     }
-
-    print('Google Books: $dadosGoogle');
-    print('Open Library: $dadosOpenLibrary');
 
     String? titulo;
 
@@ -171,6 +171,10 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
             autor = await _openLibraryService.buscarNomeAutor(
               chaveAutor,
             );
+
+            if (!contextTelaCadastroLivro.mounted) {
+              return;
+            }
           }
         }
       }
@@ -308,16 +312,17 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
                       ),
                     );
 
+                    if (!contextTelaCadastroLivro.mounted) {
+                      return;
+                    }
+
                     if (codigo == null) {
                       return;
                     }
 
                     _isbnController.text = codigo;
 
-                    await _buscarLivroPorIsbn(
-                      codigo,
-                      contextTelaCadastroLivro
-                    );
+                    await _buscarLivroPorIsbn(codigo, contextTelaCadastroLivro);
                   },
                     child: const Text('Escanear ISBN'),
                 ),
@@ -366,6 +371,10 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
                       try {
                         final cadastrado = await widget.onCadastrar(livro);
 
+                        if (!contextTelaCadastroLivro.mounted) {
+                          return;
+                        }
+
                         if (!cadastrado) {
                           ScaffoldMessenger.of(contextTelaCadastroLivro).showSnackBar(
                             const SnackBar(
@@ -376,6 +385,10 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
                           return;
                         }
                       } catch(erro) {
+
+                        if (!contextTelaCadastroLivro.mounted) {
+                          return;
+                        }
                         ScaffoldMessenger.of(contextTelaCadastroLivro).showSnackBar(
                           const SnackBar(
                             content: Text('Erro ao salvar o livro no banco de dados.'),
@@ -395,12 +408,9 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
                       _autorController.clear();
                       _isbnController.clear();
                       _editoraController.clear();
-                      _urlCapa = null;
-
-                      print('Título: ${livro.titulo}');
-                      print('Autor: ${livro.autor}');
-                      print('ISBN: ${livro.isbn}');
-                      print('Editora: ${livro.editora}');
+                      setState(() {
+                        _urlCapa = null;
+                      });
                     }
                   },
                   child: const Text("Cadastrar"),

@@ -132,16 +132,18 @@ class _TelaListagemLivrosState extends State<TelaListagemLivros> {
                               ),
                             );
 
+                            if (!context.mounted) {
+                              return;
+                            }
+
                             if (livroAtualizado == null) {
                               return;
                             }
 
                             try {
-                              await widget.onAtualizarLivro(
-                                livroAtualizado,
-                              );
+                              await widget.onAtualizarLivro(livroAtualizado,);
 
-                              if (!mounted) {
+                              if (!context.mounted) {
                                 return;
                               }
 
@@ -155,7 +157,7 @@ class _TelaListagemLivrosState extends State<TelaListagemLivros> {
                                 ),
                               );
                             } catch (erro) {
-                              if (!mounted) {
+                              if (!context.mounted) {
                                 return;
                               }
 
@@ -205,6 +207,10 @@ class _TelaListagemLivrosState extends State<TelaListagemLivros> {
                               },
                             );
 
+                            if (!context.mounted) {
+                              return;
+                            }
+
                             if (confirmar != true) {
                               return;
                             }
@@ -214,7 +220,7 @@ class _TelaListagemLivrosState extends State<TelaListagemLivros> {
                                 livro.isbn,
                               );
 
-                              if (!mounted) {
+                              if (!context.mounted) {
                                 return;
                               }
 
@@ -226,7 +232,7 @@ class _TelaListagemLivrosState extends State<TelaListagemLivros> {
                                 ),
                               );
                             } catch (erro) {
-                              if (!mounted) {
+                              if (!context.mounted) {
                                 return;
                               }
 

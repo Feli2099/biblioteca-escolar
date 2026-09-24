@@ -124,13 +124,11 @@ class _TelaInicialState extends State<TelaInicial> {
         _erroCarregamento = 'Não foi possível carregar os livros.';
       });
     } finally {
-      if (!mounted) {
-        return;
+      if (mounted) {
+        setState(() {
+          _carregandoLivros = false;
+        });
       }
-
-      setState(() {
-        _carregandoLivros = false;
-      });
     }
   }
 
