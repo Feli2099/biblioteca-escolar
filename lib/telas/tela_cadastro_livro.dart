@@ -24,6 +24,7 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
   final TextEditingController _isbnController = TextEditingController();
   final TextEditingController _editoraController = TextEditingController();
   String? _urlCapa;
+  bool _buscandoLivro = false;
 
   final _formKey = GlobalKey<FormState>();
 
@@ -100,7 +101,8 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
     return soma % 11 == 0;
   }
 
-  Future<void> _buscarLivroPorIsbn(String isbn, BuildContext contextTelaCadastroLivro,) async {
+  Future<void> _buscarLivroPorIsbn(String isbn,
+      BuildContext contextTelaCadastroLivro,) async {
     if (!_isbnValido(isbn)) {
       ScaffoldMessenger.of(contextTelaCadastroLivro).showSnackBar(
         const SnackBar(
@@ -111,128 +113,177 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
       return;
     }
 
-    final dadosGoogle = await _googleBooksService.buscarPorIsbn(isbn);
-
-    final dadosOpenLibrary = await _openLibraryService.buscarPorIsbn(isbn);
-
-    if (!contextTelaCadastroLivro.mounted) {
+    if (_buscandoLivro) {
       return;
     }
 
-    if (dadosGoogle == null && dadosOpenLibrary == null) {
-      ScaffoldMessenger.of(contextTelaCadastroLivro).showSnackBar(
-        const SnackBar(
-          content: Text('Livro não encontrado. Preencha os dados manualmente'),
-        ),
-      );
+    setState(() {
+      _buscandoLivro = true;
+    });
 
-      return;
-    }
+    try {
+        Map<String, dynamic>? dadosGoogle;
+        Map<String, dynamic>? dadosOpenLibrary;
 
-    String? titulo;
+        bool erroGoogle = false;
+        bool erroOpenLibrary = false;
 
-    if (dadosGoogle != null) {
-      final tituloGoogle = dadosGoogle['title'];
+        try {
+          dadosGoogle = await _googleBooksService.buscarPorIsbn(isbn);
+        } catch (erro) {
+          erroGoogle = true;
+        }
 
-      if (tituloGoogle is String) {
-        titulo = tituloGoogle;
+        try {
+          dadosOpenLibrary = await _openLibraryService.buscarPorIsbn(isbn);
+        } catch (erro) {
+          erroOpenLibrary = true;
+        }
+
+      if (!contextTelaCadastroLivro.mounted) {
+        return;
       }
-    }
 
-    if (titulo == null && dadosOpenLibrary != null) {
-      final tituloOpenLibrary = dadosOpenLibrary['title'];
+      if (dadosGoogle == null && dadosOpenLibrary == null) {
+        if (erroGoogle && erroOpenLibrary) {
+          ScaffoldMessenger.of(
+            contextTelaCadastroLivro,
+          ).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Não foi possível consultar os serviços de livros.',
+              ),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(
+            contextTelaCadastroLivro,
+          ).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Livro não encontrado. Preencha os dados manualmente.',
+              ),
+            ),
+          );
+        }
 
-      if (tituloOpenLibrary is String) {
-        titulo = tituloOpenLibrary;
+        return;
       }
-    }
 
-    String? autor;
+      String? titulo;
 
-    if (dadosGoogle != null) {
-      final autoresGoogle = dadosGoogle['authors'];
+      if (dadosGoogle != null) {
+        final tituloGoogle = dadosGoogle['title'];
 
-      if (autoresGoogle is List && autoresGoogle.isNotEmpty) {
-        autor = autoresGoogle.join(', ');
+        if (tituloGoogle is String) {
+          titulo = tituloGoogle;
+        }
       }
-    }
 
-    if (autor == null && dadosOpenLibrary != null) {
-      final autoresOpenLibrary = dadosOpenLibrary['authors'];
+      if (titulo == null && dadosOpenLibrary != null) {
+        final tituloOpenLibrary = dadosOpenLibrary['title'];
 
-      if (autoresOpenLibrary is List &&
-          autoresOpenLibrary.isNotEmpty) {
-        final primeiroAutor = autoresOpenLibrary.first;
+        if (tituloOpenLibrary is String) {
+          titulo = tituloOpenLibrary;
+        }
+      }
 
-        if (primeiroAutor is Map<String, dynamic>) {
-          final chaveAutor = primeiroAutor['key'];
+      String? autor;
 
-          if (chaveAutor is String) {
-            autor = await _openLibraryService.buscarNomeAutor(
-              chaveAutor,
-            );
+      if (dadosGoogle != null) {
+        final autoresGoogle = dadosGoogle['authors'];
 
-            if (!contextTelaCadastroLivro.mounted) {
-              return;
+        if (autoresGoogle is List && autoresGoogle.isNotEmpty) {
+          autor = autoresGoogle.join(', ');
+        }
+      }
+
+      if (autor == null && dadosOpenLibrary != null) {
+        final autoresOpenLibrary = dadosOpenLibrary['authors'];
+
+        if (autoresOpenLibrary is List &&
+            autoresOpenLibrary.isNotEmpty) {
+          final primeiroAutor = autoresOpenLibrary.first;
+
+          if (primeiroAutor is Map<String, dynamic>) {
+            final chaveAutor = primeiroAutor['key'];
+
+            if (chaveAutor is String) {
+              try {
+                autor = await _openLibraryService.buscarNomeAutor(
+                  chaveAutor,
+                );
+              } catch (erro) {
+                autor = null;
+              }
+
+              if (!contextTelaCadastroLivro.mounted) {
+                return;
+              }
             }
           }
         }
       }
-    }
 
-    String? editora;
+      String? editora;
 
-    if (dadosGoogle != null) {
-      final editoraGoogle = dadosGoogle['publisher'];
+      if (dadosGoogle != null) {
+        final editoraGoogle = dadosGoogle['publisher'];
 
-      if (editoraGoogle is String && editoraGoogle.isNotEmpty) {
-        editora = editoraGoogle;
-      }
-    }
-
-    if (editora == null && dadosOpenLibrary != null) {
-      final editorasOpenLibrary = dadosOpenLibrary['publishers'];
-
-      if (editorasOpenLibrary is List && editorasOpenLibrary.isNotEmpty) {
-        final primeiraEditora = editorasOpenLibrary.first;
-
-        if (primeiraEditora is String) {
-          editora = primeiraEditora;
+        if (editoraGoogle is String && editoraGoogle.isNotEmpty) {
+          editora = editoraGoogle;
         }
       }
-    }
 
-    String? urlCapa;
+      if (editora == null && dadosOpenLibrary != null) {
+        final editorasOpenLibrary = dadosOpenLibrary['publishers'];
 
-    if (dadosGoogle != null) {
-      final imageLinks = dadosGoogle['imageLinks'];
+        if (editorasOpenLibrary is List && editorasOpenLibrary.isNotEmpty) {
+          final primeiraEditora = editorasOpenLibrary.first;
 
-      if (imageLinks is Map<String, dynamic>) {
-        final thumbnail = imageLinks['thumbnail'];
-
-        if (thumbnail is String && thumbnail.isNotEmpty) {
-          urlCapa = thumbnail;
+          if (primeiraEditora is String) {
+            editora = primeiraEditora;
+          }
         }
       }
-    }
 
-    if (urlCapa == null && dadosOpenLibrary != null) {
-      final capasOpenLibrary = dadosOpenLibrary['covers'];
+      String? urlCapa;
 
-      if (capasOpenLibrary is List && capasOpenLibrary.isNotEmpty) {
-        final primeiraCapa = capasOpenLibrary.first;
+      if (dadosGoogle != null) {
+        final imageLinks = dadosGoogle['imageLinks'];
 
-        if (primeiraCapa is int) {
-          urlCapa = 'https://covers.openlibrary.org/b/id/$primeiraCapa-M.jpg';
+        if (imageLinks is Map<String, dynamic>) {
+          final thumbnail = imageLinks['thumbnail'];
+
+          if (thumbnail is String && thumbnail.isNotEmpty) {
+            urlCapa = thumbnail;
+          }
         }
       }
+
+      if (urlCapa == null && dadosOpenLibrary != null) {
+        final capasOpenLibrary = dadosOpenLibrary['covers'];
+
+        if (capasOpenLibrary is List && capasOpenLibrary.isNotEmpty) {
+          final primeiraCapa = capasOpenLibrary.first;
+
+          if (primeiraCapa is int) {
+            urlCapa = 'https://covers.openlibrary.org/b/id/$primeiraCapa-M.jpg';
+          }
+        }
+      }
+
+      _tituloController.text = titulo ?? '';
+      _autorController.text = autor ?? '';
+      _editoraController.text = editora ?? '';
+      _urlCapa = urlCapa;
+    } finally {
+      if (mounted) {
+        setState(() {
+          _buscandoLivro = false;
+        });
+      }
     }
-
-    _tituloController.text = titulo ?? '';
-    _autorController.text = autor ?? '';
-    _editoraController.text = editora ?? '';
-    _urlCapa = urlCapa;
-
   }
 
   @override
@@ -304,11 +355,14 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
                 const SizedBox(height: 8),
 
                 ElevatedButton(
-                  onPressed: () async {
+                  onPressed: _buscandoLivro
+                      ? null
+                      : () async {
                     final codigo = await Navigator.push<String>(
                       contextTelaCadastroLivro,
                       MaterialPageRoute(
-                        builder: (contextRotaScanner) => const TelaScannerIsbn(),
+                        builder: (contextRotaScanner) =>
+                        const TelaScannerIsbn(),
                       ),
                     );
 
@@ -322,9 +376,16 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
 
                     _isbnController.text = codigo;
 
-                    await _buscarLivroPorIsbn(codigo, contextTelaCadastroLivro);
+                    await _buscarLivroPorIsbn(
+                      codigo,
+                      contextTelaCadastroLivro,
+                    );
                   },
-                    child: const Text('Escanear ISBN'),
+                  child: Text(
+                    _buscandoLivro
+                        ? 'Buscando...'
+                        : 'Escanear ISBN',
+                  ),
                 ),
 
                 SizedBox(height: 16),
@@ -339,15 +400,18 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
                 const SizedBox(height: 24),
 
                 ElevatedButton(
-                  onPressed: () async {
-                    final isbn = _isbnController.text.trim();
+                  onPressed: _buscandoLivro
+                  ? null
+                  : () async {
+                      final isbn = _isbnController.text.trim();
 
-                    await _buscarLivroPorIsbn(
-                      isbn,
-                      contextTelaCadastroLivro,
-                    );
+                      await _buscarLivroPorIsbn(isbn, contextTelaCadastroLivro);
                   },
-                  child: const Text('Buscar ISBN'),
+                  child: Text(
+                    _buscandoLivro
+                        ? 'Buscando...'
+                        : 'Buscar iSBN'
+                  ),
                 ),
 
                 const SizedBox(height: 24),
