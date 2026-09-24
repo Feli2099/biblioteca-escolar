@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:biblioteca_escolar/modelos/livro.dart';
+import 'package:biblioteca_escolar/telas/tela_edicao_livro.dart';
 
 class TelaListagemLivros extends StatefulWidget {
   final List<Livro> livros;
   final Future<void> Function(String) onExcluirLivro;
+  final Future<void> Function(Livro) onAtualizarLivro;
 
   const TelaListagemLivros({
     super.key,
     required this.livros,
     required this.onExcluirLivro,
+    required this.onAtualizarLivro,
   });
 
   @override
@@ -113,6 +116,60 @@ class _TelaListagemLivrosState extends State<TelaListagemLivros> {
                               if (livro.editora.trim().isNotEmpty)
                                 Text('Editora: ${livro.editora}'),
                             ],
+                          ),
+                        ),
+
+                        IconButton(
+                          onPressed: () async {
+                            final livroAtualizado = await Navigator.push<Livro>(
+                              context,
+                              MaterialPageRoute(
+                                builder: (contextTelaEdicao) {
+                                  return TelaEdicaoLivro(
+                                    livro: livro,
+                                  );
+                                },
+                              ),
+                            );
+
+                            if (livroAtualizado == null) {
+                              return;
+                            }
+
+                            try {
+                              await widget.onAtualizarLivro(
+                                livroAtualizado,
+                              );
+
+                              if (!mounted) {
+                                return;
+                              }
+
+                              setState(() {});
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Livro atualizado com sucesso!',
+                                  ),
+                                ),
+                              );
+                            } catch (erro) {
+                              if (!mounted) {
+                                return;
+                              }
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Erro ao atualizar o livro.',
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                          icon: const Icon(
+                            Icons.edit_outlined,
                           ),
                         ),
 

@@ -41,4 +41,15 @@ class FirestoreLivrosService {
 
     await _firestore.collection('livros').doc(isbnNormalizado).delete();
   }
+
+  Future<void> atualizarLivro(Livro livro) async {
+    final isbnNormalizado = _normalizarIsbn(livro.isbn);
+    
+    await _firestore.collection('livros').doc(isbnNormalizado).update({
+      'titulo': livro.titulo,
+      'autor': livro.autor,
+      'editora': livro.editora,
+      'urlCapa': livro.urlCapa,
+    });
+  }
 }
