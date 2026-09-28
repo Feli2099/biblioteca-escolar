@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'tela_livros.dart';
+import 'tela_alunos.dart';
 import 'package:biblioteca_escolar/modelos/livro.dart';
 import 'package:biblioteca_escolar/servicos/firestore_livros_service.dart';
+import 'package:biblioteca_escolar/modelos/aluno.dart';
+import 'package:biblioteca_escolar/servicos/firestore_alunos_service.dart';
+
 
 class TelaInicial extends StatefulWidget {
   const TelaInicial({super.key});
@@ -14,11 +18,13 @@ class TelaInicial extends StatefulWidget {
 
 class _TelaInicialState extends State<TelaInicial> {
   final List<Livro> _livros = [];
+  final List<Aluno> _alunos = [];
 
   bool _carregandoLivros = true;
-  String? _erroCarregamento;
+  String? _erroCarregamentoLivros;
 
   final FirestoreLivrosService _firestoreLivrosService = FirestoreLivrosService();
+  final FirestoreAlunosService _firestoreAlunosService = FirestoreAlunosService();
 
   Future<bool> _adicionarLivro(Livro livro) async {
     final cadastrado = await _firestoreLivrosService.adicionarLivro(livro);
@@ -109,7 +115,7 @@ class _TelaInicialState extends State<TelaInicial> {
     if (mounted) {
       setState(() {
         _carregandoLivros = true;
-        _erroCarregamento = null;
+        _erroCarregamentoLivros = null;
       });
     }
 
@@ -121,7 +127,7 @@ class _TelaInicialState extends State<TelaInicial> {
       }
 
       setState(() {
-        _erroCarregamento = 'Não foi possível carregar os livros.';
+        _erroCarregamentoLivros = 'Não foi possível carregar os livros.';
       });
     } finally {
       if (mounted) {
@@ -130,6 +136,31 @@ class _TelaInicialState extends State<TelaInicial> {
         });
       }
     }
+  }
+
+  Future<void> _carregarAlunos() async {
+    final alunosSalvos = await _firestoreAlunosService.buscarAlunos();
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _alunos.clear();
+      _alunos.addAll(alunosSalvos);
+    });
+  }
+
+  Future<void> _adicionarAluno(Aluno aluno) async {
+    final alunoSalvo = await _firestoreAlunosService.adicionarAluno(aluno);
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _alunos.add(alunoSalvo);
+    });
   }
 
   @override
@@ -166,10 +197,10 @@ class _TelaInicialState extends State<TelaInicial> {
                 child: CircularProgressIndicator(),
               ),
 
-            if (_erroCarregamento != null)
+            if (_erroCarregamentoLivros != null)
               Column(
                 children: [
-                  Text(_erroCarregamento!),
+                  Text(_erroCarregamentoLivros!),
                   
                   TextButton(
                       onPressed: _carregarLivrosInicial,
@@ -204,7 +235,41 @@ class _TelaInicialState extends State<TelaInicial> {
             const SizedBox(height: 15),
 
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () async {
+                try {
+                  await _carregarAlunos();
+
+                  if (!contextTelaInicial.mounted) {
+                    return;
+                  }
+
+                  Navigator.push(
+                    contextTelaInicial,
+                    MaterialPageRoute(
+                      builder: (contextoRotaAlunos) {
+                        return TelaAlunos(
+                          alunos: _alunos,
+                          onAdicionarAluno: _adicionarAluno,
+                        );
+                      },
+                    ),
+                  );
+                } catch (erro) {
+                  if (!contextTelaInicial.mounted) {
+                    return;
+                  }
+
+                  ScaffoldMessenger.of(
+                    contextTelaInicial,
+                  ).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Não foi possível carregar os alunos.',
+                      ),
+                    ),
+                  );
+                }
+              },
               child: const Text('Alunos'),
             ),
 
