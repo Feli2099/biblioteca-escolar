@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:biblioteca_escolar/modelos/aluno.dart';
+import 'tela_cadastro_aluno.dart';
 
 class TelaAlunos extends StatefulWidget {
   final List<Aluno> alunos;
@@ -30,6 +31,16 @@ class _TelaAlunosState extends State<TelaAlunos> {
           children: [
             ElevatedButton(
               onPressed: () {
+                Navigator.push(
+                  contextTelaAlunos,
+                  MaterialPageRoute(
+                    builder: (contextTelaCadastroAluno) {
+                      return TelaCadastroAluno(
+                        onCadastrar: widget.onAdicionarAluno,
+                      );
+                    },
+                  ),
+                );
               },
               child: const Text('Cadastrar Aluno'),
             ),
