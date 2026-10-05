@@ -1,47 +1,88 @@
 # Biblioteca Escolar
 
-Aplicativo mobile desenvolvido em Flutter para auxiliar no gerenciamento da biblioteca escolar.
+Aplicativo desenvolvido em Flutter para auxiliar no gerenciamento de uma biblioteca escolar, permitindo o cadastro de livros e alunos, além do controle de empréstimos e devoluções.
 
 ## Objetivo
 
-O aplicativo tem como objetivo facilitar o cadastro de livros, alunos e o controle de empréstimos da biblioteca.
+O projeto tem como objetivo facilitar a organização da biblioteca escolar, centralizando informações sobre livros, alunos e empréstimos em uma aplicação simples e de fácil utilização.
 
-## Funcionalidades planejadas
+## Funcionalidades
 
-- Cadastro de livros
+### Livros
+
+- Cadastro manual de livros
+- Listagem de livros cadastrados
+- Edição de livros
+- Exclusão de livros
+- Validação de ISBN-10 e ISBN-13
+- Prevenção de ISBN duplicado
+- Leitura de código de barras/ISBN utilizando a câmera
+- Busca automática de informações do livro pelo ISBN
+- Consulta à Google Books API
+- Consulta complementar à Open Library
+- Preenchimento automático de:
+    - título
+    - autor
+    - editora
+    - capa
+- Exibição da capa dos livros
+
+### Alunos
+
 - Cadastro de alunos
-- Controle de empréstimos e devoluções
-- Leitura de código de barras/ISBN pela câmera
-- Consulta automática de informações de livros pelo ISBN
+- Listagem de alunos
+- Edição de alunos
+- Exclusão de alunos
+- Armazenamento de nome completo e turma
 
-## Tecnologias
+### Empréstimos
+
+- Registro de empréstimos
+- Seleção do aluno
+- Seleção do livro
+- Definição da data prevista de devolução
+- Bloqueio de novo empréstimo para livros que já possuem um empréstimo ativo
+
+### Em desenvolvimento
+
+- Listagem de empréstimos
+- Registro de devolução
+- Melhorias na interface
+- Preparação para uso em ambiente escolar
+
+## Persistência de dados
+
+Os dados são armazenados utilizando o Firebase Cloud Firestore.
+
+Atualmente são utilizadas as seguintes coleções:
+
+- `livros`
+- `alunos`
+- `emprestimos`
+
+## Tecnologias utilizadas
 
 - Flutter
 - Dart
+- Firebase
+- Cloud Firestore
+- Google Books API
+- Open Library API
+- `mobile_scanner`
+- `http`
 
-## Status
+## Plataformas
 
-🚧 Projeto em desenvolvimento.# Biblioteca Escolar
+O desenvolvimento atualmente é voltado para:
 
-Aplicativo mobile desenvolvido em Flutter para auxiliar no gerenciamento da biblioteca escolar.
+- Android
+- Web, utilizado principalmente durante o desenvolvimento e testes
 
-## Objetivo
+## Google Books API
 
-O aplicativo tem como objetivo facilitar o cadastro de livros, alunos e o controle de empréstimos da biblioteca.
+A chave da Google Books API não é armazenada diretamente no código.
 
-## Funcionalidades planejadas
+Para executar o projeto informando a chave:
 
-- Cadastro de livros
-- Cadastro de alunos
-- Controle de empréstimos e devoluções
-- Leitura de código de barras/ISBN pela câmera
-- Consulta automática de informações de livros pelo ISBN
-
-## Tecnologias
-
-- Flutter
-- Dart
-
-## Status
-
-🚧 Projeto em desenvolvimento.
+```bash
+flutter run -d chrome --dart-define=GOOGLE_BOOKS_API_KEY=SUA_CHAVE
