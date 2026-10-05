@@ -163,6 +163,28 @@ class _TelaInicialState extends State<TelaInicial> {
     });
   }
 
+  Future<void> _atualizarAluno(Aluno alunoAtualizado) async {
+    await _firestoreAlunosService.atualizarAluno(
+      alunoAtualizado,
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    final indice = _alunos.indexWhere(
+          (aluno) => aluno.id == alunoAtualizado.id,
+    );
+
+    if (indice == -1) {
+      return;
+    }
+
+    setState(() {
+      _alunos[indice] = alunoAtualizado;
+    });
+  }
+
   @override
   Widget build(BuildContext contextTelaInicial) {
     return Scaffold(
@@ -250,6 +272,7 @@ class _TelaInicialState extends State<TelaInicial> {
                         return TelaAlunos(
                           alunos: _alunos,
                           onAdicionarAluno: _adicionarAluno,
+                          onAtualizarAluno: _atualizarAluno,
                         );
                       },
                     ),

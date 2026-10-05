@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:biblioteca_escolar/modelos/aluno.dart';
 import 'tela_cadastro_aluno.dart';
+import 'tela_listagem_alunos.dart';
 
 class TelaAlunos extends StatefulWidget {
   final List<Aluno> alunos;
   final Future<void> Function(Aluno) onAdicionarAluno;
+  final Future<void> Function(Aluno) onAtualizarAluno;
 
   const TelaAlunos({
     super.key,
     required this.alunos,
     required this.onAdicionarAluno,
+    required this.onAtualizarAluno,
   });
 
   @override
@@ -49,6 +52,17 @@ class _TelaAlunosState extends State<TelaAlunos> {
 
             ElevatedButton(
               onPressed: () {
+                Navigator.push(
+                  contextTelaAlunos,
+                  MaterialPageRoute(
+                    builder: (contextTelaListagemAlunos) {
+                      return TelaListagemAlunos(
+                        alunos: widget.alunos,
+                        onAtualizarAluno: widget.onAtualizarAluno,
+                      );
+                    },
+                  ),
+                );
               },
               child: const Text('Listar Alunos'),
             ),
