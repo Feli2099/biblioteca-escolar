@@ -40,7 +40,7 @@ class _TelaCadastroEmprestimoState
         child: Column(
           children: [
             DropdownButtonFormField<Aluno>(
-              value: _alunoSelecionado,
+              initialValue: _alunoSelecionado,
               decoration: const InputDecoration(
                 labelText: 'Aluno',
               ),
@@ -62,7 +62,7 @@ class _TelaCadastroEmprestimoState
             const SizedBox(height: 16),
 
             DropdownButtonFormField<Livro>(
-              value: _livroSelecionado,
+              initialValue: _livroSelecionado,
               decoration: const InputDecoration(
                 labelText: 'Livro',
               ),

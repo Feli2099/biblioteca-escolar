@@ -46,11 +46,6 @@ class _TelaInicialState extends State<TelaInicial> {
           _livros.add(livro);
         });
       }
-
-      print(
-        'Livro salvo no Firestore, '
-        'mas a lista não pôde ser atualizada: $erro',
-      );
     }
 
     return true;

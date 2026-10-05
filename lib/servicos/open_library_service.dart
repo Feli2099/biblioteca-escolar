@@ -45,9 +45,6 @@ class OpenLibraryService {
         continue;
       }
 
-      print('Erro na Open Library: ${resposta.statusCode}');
-      print('Resposta: ${resposta.body}');
-
       return null;
     }
 
@@ -95,8 +92,6 @@ class OpenLibraryService {
 
         continue;
       }
-
-      print('Erro ao buscar autor na Open Library: ${resposta.statusCode}',);
 
       return null;
     }

@@ -23,14 +23,8 @@ class GoogleBooksService {
     for(int tentativa = 1; tentativa <= maxTentativas; tentativa++) {
       final resposta = await http.get(url);
 
-      print(
-        'Tentativa $tentativa de $maxTentativas: ${resposta.statusCode}',
-      );
-
       if (resposta.statusCode == 200) {
         final dados = jsonDecode(resposta.body);
-
-        print(dados);
 
         if (dados['totalItems'] == 0) {
           return null;
@@ -70,9 +64,6 @@ class GoogleBooksService {
 
         continue;
       }
-
-      print('Erro na Google Books API: ${resposta.statusCode}');
-      print('Resposta: ${resposta.body}');
 
       return null;
     }
