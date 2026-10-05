@@ -7,12 +7,14 @@ class TelaAlunos extends StatefulWidget {
   final List<Aluno> alunos;
   final Future<void> Function(Aluno) onAdicionarAluno;
   final Future<void> Function(Aluno) onAtualizarAluno;
+  final Future<void> Function(String) onExcluirAluno;
 
   const TelaAlunos({
     super.key,
     required this.alunos,
     required this.onAdicionarAluno,
     required this.onAtualizarAluno,
+    required this.onExcluirAluno,
   });
 
   @override
@@ -59,6 +61,7 @@ class _TelaAlunosState extends State<TelaAlunos> {
                       return TelaListagemAlunos(
                         alunos: widget.alunos,
                         onAtualizarAluno: widget.onAtualizarAluno,
+                        onExcluirAluno: widget.onExcluirAluno,
                       );
                     },
                   ),

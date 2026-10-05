@@ -5,15 +5,17 @@ import 'tela_edicao_aluno.dart';
 class TelaListagemAlunos extends StatefulWidget {
   final List<Aluno> alunos;
   final Future<void> Function(Aluno) onAtualizarAluno;
+  final Future<void> Function(String) onExcluirAluno;
 
   const TelaListagemAlunos({
     super.key,
     required this.alunos,
     required this.onAtualizarAluno,
+    required this.onExcluirAluno,
   });
 
   @override
-  State<StatefulWidget> createState() {
+  State<TelaListagemAlunos> createState() {
     return _TelaListagemAlunosState();
   }
 }
@@ -49,57 +51,169 @@ class _TelaListagemAlunosState extends State<TelaListagemAlunos> {
               subtitle: Text(
                 'Turma: ${aluno.turma}',
               ),
-              trailing: IconButton(
-                icon: const Icon(Icons.edit_outlined),
-                onPressed: () async {
-                  final alunoAtualizado =
-                  await Navigator.push<Aluno>(
-                    context,
-                    MaterialPageRoute(
-                      builder: (contextTelaEdicaoAluno) {
-                        return TelaEdicaoAluno(
-                          aluno: aluno,
-                        );
-                      },
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: const Icon(
+                      Icons.edit_outlined,
                     ),
-                  );
-
-                  if (!context.mounted || alunoAtualizado == null) {
-                    return;
-                  }
-
-                  try {
-                    await widget.onAtualizarAluno(
-                      alunoAtualizado,
-                    );
-
-                    if (!context.mounted) {
-                      return;
-                    }
-
-                    setState(() {});
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Aluno atualizado com sucesso!',
+                    onPressed: () async {
+                      final alunoAtualizado =
+                      await Navigator.push<Aluno>(
+                        contextTelaListagemAlunos,
+                        MaterialPageRoute(
+                          builder: (contextTelaEdicaoAluno) {
+                            return TelaEdicaoAluno(
+                              aluno: aluno,
+                            );
+                          },
                         ),
-                      ),
-                    );
-                  } catch (erro) {
-                    if (!context.mounted) {
-                      return;
-                    }
+                      );
 
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Erro ao atualizar o aluno.',
-                        ),
-                      ),
-                    );
-                  }
-                },
+                      if (!contextTelaListagemAlunos.mounted) {
+                        return;
+                      }
+
+                      if (alunoAtualizado == null) {
+                        return;
+                      }
+
+                      try {
+                        await widget.onAtualizarAluno(
+                          alunoAtualizado,
+                        );
+
+                        if (!contextTelaListagemAlunos.mounted) {
+                          return;
+                        }
+
+                        setState(() {});
+
+                        ScaffoldMessenger.of(
+                          contextTelaListagemAlunos,
+                        ).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Aluno atualizado com sucesso!',
+                            ),
+                          ),
+                        );
+                      } catch (erro) {
+                        if (!contextTelaListagemAlunos.mounted) {
+                          return;
+                        }
+
+                        ScaffoldMessenger.of(
+                          contextTelaListagemAlunos,
+                        ).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Erro ao atualizar o aluno.',
+                            ),
+                          ),
+                        );
+                      }
+                    },
+                  ),
+
+                  IconButton(
+                    icon: const Icon(
+                      Icons.delete_outline,
+                    ),
+                    onPressed: () async {
+                      if (aluno.id == null) {
+                        ScaffoldMessenger.of(
+                          contextTelaListagemAlunos,
+                        ).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Não foi possível identificar o aluno.',
+                            ),
+                          ),
+                        );
+
+                        return;
+                      }
+
+                      final confirmar = await showDialog<bool>(
+                        context: contextTelaListagemAlunos,
+                        builder: (contextoDialogo) {
+                          return AlertDialog(
+                            title: const Text('Excluir aluno'),
+                            content: Text(
+                              'Deseja excluir "${aluno.nomeCompleto}"?',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(
+                                    contextoDialogo,
+                                    false,
+                                  );
+                                },
+                                child: const Text('Cancelar'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(
+                                    contextoDialogo,
+                                    true,
+                                  );
+                                },
+                                child: const Text('Excluir'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+
+                      if (!contextTelaListagemAlunos.mounted) {
+                        return;
+                      }
+
+                      if (confirmar != true) {
+                        return;
+                      }
+
+                      try {
+                        await widget.onExcluirAluno(
+                          aluno.id!,
+                        );
+
+                        if (!contextTelaListagemAlunos.mounted) {
+                          return;
+                        }
+
+                        setState(() {});
+
+                        ScaffoldMessenger.of(
+                          contextTelaListagemAlunos,
+                        ).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Aluno excluído com sucesso!',
+                            ),
+                          ),
+                        );
+                      } catch (erro) {
+                        if (!contextTelaListagemAlunos.mounted) {
+                          return;
+                        }
+
+                        ScaffoldMessenger.of(
+                          contextTelaListagemAlunos,
+                        ).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Erro ao excluir o aluno.',
+                            ),
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                ],
               ),
             ),
           );

@@ -185,6 +185,20 @@ class _TelaInicialState extends State<TelaInicial> {
     });
   }
 
+  Future<void> _excluirAluno(String id) async {
+    await _firestoreAlunosService.excluirAluno(id);
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _alunos.removeWhere(
+        (aluno) => aluno.id == id,
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext contextTelaInicial) {
     return Scaffold(
@@ -273,6 +287,7 @@ class _TelaInicialState extends State<TelaInicial> {
                           alunos: _alunos,
                           onAdicionarAluno: _adicionarAluno,
                           onAtualizarAluno: _atualizarAluno,
+                          onExcluirAluno: _excluirAluno,
                         );
                       },
                     ),
