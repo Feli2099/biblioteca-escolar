@@ -3,6 +3,7 @@ import 'package:biblioteca_escolar/modelos/aluno.dart';
 import 'package:biblioteca_escolar/modelos/livro.dart';
 import 'package:biblioteca_escolar/modelos/emprestimo.dart';
 import 'package:biblioteca_escolar/telas/tela_cadastro_emprestimo.dart';
+import 'package:biblioteca_escolar/telas/tela_listagem_emprestimos.dart';
 
 class TelaEmprestimos extends StatefulWidget {
   final List<Aluno> alunos;
@@ -68,6 +69,18 @@ class _TelaEmprestimosState
 
             ElevatedButton(
               onPressed: () {
+                Navigator.push(
+                  contextTelaEmprestimos,
+                  MaterialPageRoute(
+                    builder: (contextTelaListagemEmprestimos) {
+                      return TelaListagemEmprestimos(
+                        emprestimos: widget.emprestimos,
+                        onRegistrarDevolucao:
+                        widget.onRegistrarDevolucao,
+                      );
+                    },
+                  ),
+                );
               },
               child: const Text(
                 'Listar Empréstimos',
