@@ -8,6 +8,7 @@ import 'package:biblioteca_escolar/servicos/firestore_alunos_service.dart';
 import 'package:biblioteca_escolar/modelos/emprestimo.dart';
 import 'package:biblioteca_escolar/servicos/firestore_emprestimos_service.dart';
 import 'package:biblioteca_escolar/telas/tela_emprestimos.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class TelaInicial extends StatefulWidget {
   const TelaInicial({super.key});
@@ -254,6 +255,57 @@ class _TelaInicialState extends State<TelaInicial> {
       appBar: AppBar(
         title: const Text('Biblioteca Escolar'),
         centerTitle: true,
+        actions: [
+          IconButton(
+            tooltip: 'Sair',
+            icon: const Icon(
+              Icons.logout,
+            ),
+            onPressed: () async {
+              final confirmar = await showDialog<bool>(
+                context: contextTelaInicial,
+                builder: (contextoDialogo) {
+                  return AlertDialog(
+                    title: const Text('Sair'),
+                    content: const Text(
+                      'Deseja sair da sua conta?',
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(
+                            contextoDialogo,
+                            false,
+                          );
+                        },
+                        child: const Text('Cancelar'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(
+                            contextoDialogo,
+                            true,
+                          );
+                        },
+                        child: const Text('Sair'),
+                      ),
+                    ],
+                  );
+                },
+              );
+
+              if (!contextTelaInicial.mounted) {
+                return;
+              }
+
+              if (confirmar != true) {
+                return;
+              }
+
+              await FirebaseAuth.instance.signOut();
+            },
+          ),
+        ],
       ),
       body: Center(
         child: Column(
