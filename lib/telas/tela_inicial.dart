@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'tela_livros.dart';
-import 'tela_alunos.dart';
+import 'livros/tela_livros.dart';
+import 'alunos/tela_alunos.dart';
 import 'package:biblioteca_escolar/modelos/livro.dart';
 import 'package:biblioteca_escolar/servicos/firestore_livros_service.dart';
 import 'package:biblioteca_escolar/modelos/aluno.dart';
 import 'package:biblioteca_escolar/servicos/firestore_alunos_service.dart';
 import 'package:biblioteca_escolar/modelos/emprestimo.dart';
 import 'package:biblioteca_escolar/servicos/firestore_emprestimos_service.dart';
-import 'package:biblioteca_escolar/telas/tela_emprestimos.dart';
+import 'package:biblioteca_escolar/telas/emprestimos/tela_emprestimos.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class TelaInicial extends StatefulWidget {
@@ -56,24 +56,36 @@ class _TelaInicialState extends State<TelaInicial> {
     return true;
   }
 
-  Future<void> _excluirLivro(String isbn) async {
+  Future<bool> _excluirLivro(String isbn) async {
+    final possuiEmprestimoAtivo =
+    await _firestoreEmprestimosService
+        .livroPossuiEmprestimoAtivo(isbn);
+
+    if (possuiEmprestimoAtivo) {
+      return false;
+    }
+
     await _firestoreLivrosService.excluirLivro(isbn);
 
     if (!mounted) {
-      return;
+      return true;
     }
 
     setState(() {
       _livros.removeWhere(
-          (livro) => _normalizarIsbn(livro.isbn) == _normalizarIsbn(isbn),
+            (livro) =>
+        _normalizarIsbn(livro.isbn) ==
+            _normalizarIsbn(isbn),
       );
     });
+
+    return true;
   }
 
   Future<void> _atualizarLivro(Livro livroAtualizado) async {
-    await _firestoreLivrosService.atualizarLivro(
-      livroAtualizado
-    );
+    await _firestoreLivrosService.atualizarLivro(livroAtualizado);
+
+    await _firestoreEmprestimosService.atualizarTituloLivroEmprestimosAtivos(livroAtualizado.isbn, livroAtualizado.titulo);
 
     if (!mounted) {
       return;
@@ -169,9 +181,9 @@ class _TelaInicialState extends State<TelaInicial> {
   }
 
   Future<void> _atualizarAluno(Aluno alunoAtualizado) async {
-    await _firestoreAlunosService.atualizarAluno(
-      alunoAtualizado,
-    );
+    await _firestoreAlunosService.atualizarAluno(alunoAtualizado);
+
+    await _firestoreEmprestimosService.atualizarNomeAlunoEmprestimosAtivos(alunoAtualizado.id!, alunoAtualizado.nomeCompleto);
 
     if (!mounted) {
       return;
@@ -190,18 +202,28 @@ class _TelaInicialState extends State<TelaInicial> {
     });
   }
 
-  Future<void> _excluirAluno(String id) async {
+  Future<bool> _excluirAluno(String id) async {
+    final possuiEmprestimoAtivo =
+    await _firestoreEmprestimosService
+        .alunoPossuiEmprestimoAtivo(id);
+
+    if (possuiEmprestimoAtivo) {
+      return false;
+    }
+
     await _firestoreAlunosService.excluirAluno(id);
 
     if (!mounted) {
-      return;
+      return true;
     }
 
     setState(() {
       _alunos.removeWhere(
-        (aluno) => aluno.id == id,
+            (aluno) => aluno.id == id,
       );
     });
+
+    return true;
   }
 
   Future<void> _carregarEmprestimos() async {

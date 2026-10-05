@@ -5,9 +5,7 @@ class FirestoreEmprestimosService {
   final FirebaseFirestore _firestore =
       FirebaseFirestore.instance;
 
-  Future<Emprestimo?> adicionarEmprestimo(
-      Emprestimo emprestimo,
-      ) async {
+  Future<Emprestimo?> adicionarEmprestimo(Emprestimo emprestimo) async {
     final isbnNormalizado =
     _normalizarIsbn(emprestimo.livroIsbn);
 
@@ -56,9 +54,7 @@ class FirestoreEmprestimosService {
     }).toList();
   }
 
-  Future<bool> livroPossuiEmprestimoAtivo(
-      String isbn,
-      ) async {
+  Future<bool> livroPossuiEmprestimoAtivo(String isbn) async {
     final isbnNormalizado = _normalizarIsbn(isbn);
 
     final resultado = await _firestore
@@ -77,17 +73,85 @@ class FirestoreEmprestimosService {
     return resultado.docs.isNotEmpty;
   }
 
-  Future<void> registrarDevolucao(
-      String idEmprestimo,
-      ) async {
-    await _firestore
+  Future<bool> alunoPossuiEmprestimoAtivo(String alunoId) async {
+    final resultado = await _firestore
         .collection('emprestimos')
-        .doc(idEmprestimo)
-        .update({
+        .where(
+      'alunoId',
+      isEqualTo: alunoId,
+    )
+        .where(
+      'devolvido',
+      isEqualTo: false,
+    )
+        .limit(1)
+        .get();
+
+    return resultado.docs.isNotEmpty;
+  }
+
+  Future<void> registrarDevolucao(String idEmprestimo) async {
+    await _firestore.collection('emprestimos').doc(idEmprestimo).update({
       'devolvido': true,
       'dataDevolucaoReal':
       Timestamp.fromDate(DateTime.now()),
     });
+  }
+
+  Future<void> atualizarNomeAlunoEmprestimosAtivos(String alunoId, String novoNome) async {
+    final resultado = await _firestore
+        .collection('emprestimos')
+        .where(
+      'alunoId',
+      isEqualTo: alunoId,
+    )
+        .where(
+      'devolvido',
+      isEqualTo: false,
+    )
+        .get();
+
+    final batch = _firestore.batch();
+
+    for (final documento in resultado.docs) {
+      batch.update(
+        documento.reference,
+        {
+          'alunoNome': novoNome,
+        },
+      );
+    }
+
+    await batch.commit();
+  }
+
+  Future<void> atualizarTituloLivroEmprestimosAtivos(String isbn, String novoTitulo) async {
+    final isbnNormalizado = _normalizarIsbn(isbn);
+
+    final resultado = await _firestore
+        .collection('emprestimos')
+        .where(
+      'livroIsbn',
+      isEqualTo: isbnNormalizado,
+    )
+        .where(
+      'devolvido',
+      isEqualTo: false,
+    )
+        .get();
+
+    final batch = _firestore.batch();
+
+    for (final documento in resultado.docs) {
+      batch.update(
+        documento.reference,
+        {
+          'livroTitulo': novoTitulo,
+        },
+      );
+    }
+
+    await batch.commit();
   }
 
   String _normalizarIsbn(String isbn) {

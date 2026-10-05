@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:biblioteca_escolar/modelos/aluno.dart';
 import 'package:biblioteca_escolar/modelos/livro.dart';
 import 'package:biblioteca_escolar/modelos/emprestimo.dart';
-import 'package:biblioteca_escolar/telas/tela_cadastro_emprestimo.dart';
-import 'package:biblioteca_escolar/telas/tela_listagem_emprestimos.dart';
+import 'package:biblioteca_escolar/telas/emprestimos/tela_cadastro_emprestimo.dart';
+import 'package:biblioteca_escolar/telas/emprestimos/tela_listagem_emprestimos.dart';
 
 class TelaEmprestimos extends StatefulWidget {
   final List<Aluno> alunos;

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:biblioteca_escolar/modelos/livro.dart';
 import 'package:biblioteca_escolar/servicos/google_books_service.dart';
 import 'package:biblioteca_escolar/servicos/open_library_service.dart';
-import 'package:biblioteca_escolar/telas/tela_scanner_isbn.dart';
+import 'package:biblioteca_escolar/telas/livros/tela_scanner_isbn.dart';
 
 class TelaCadastroLivro extends StatefulWidget {
   final Future<bool> Function(Livro) onCadastrar;

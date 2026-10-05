@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:biblioteca_escolar/modelos/livro.dart';
-import 'package:biblioteca_escolar/telas/tela_edicao_livro.dart';
+import 'package:biblioteca_escolar/telas/livros/tela_edicao_livro.dart';
 
 class TelaListagemLivros extends StatefulWidget {
   final List<Livro> livros;
-  final Future<void> Function(String) onExcluirLivro;
+  final Future<bool> Function(String) onExcluirLivro;
   final Future<void> Function(Livro) onAtualizarLivro;
 
   const TelaListagemLivros({
@@ -216,11 +216,23 @@ class _TelaListagemLivrosState extends State<TelaListagemLivros> {
                             }
 
                             try {
-                              await widget.onExcluirLivro(
+                              final excluido = await widget.onExcluirLivro(
                                 livro.isbn,
                               );
 
                               if (!context.mounted) {
+                                return;
+                              }
+
+                              if (!excluido) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Não é possível excluir um livro com empréstimo ativo.',
+                                    ),
+                                  ),
+                                );
+
                                 return;
                               }
 

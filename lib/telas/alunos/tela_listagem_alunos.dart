@@ -5,7 +5,7 @@ import 'tela_edicao_aluno.dart';
 class TelaListagemAlunos extends StatefulWidget {
   final List<Aluno> alunos;
   final Future<void> Function(Aluno) onAtualizarAluno;
-  final Future<void> Function(String) onExcluirAluno;
+  final Future<bool> Function(String) onExcluirAluno;
 
   const TelaListagemAlunos({
     super.key,
@@ -177,11 +177,25 @@ class _TelaListagemAlunosState extends State<TelaListagemAlunos> {
                       }
 
                       try {
-                        await widget.onExcluirAluno(
+                        final excluido = await widget.onExcluirAluno(
                           aluno.id!,
                         );
 
                         if (!contextTelaListagemAlunos.mounted) {
+                          return;
+                        }
+
+                        if (!excluido) {
+                          ScaffoldMessenger.of(
+                            contextTelaListagemAlunos,
+                          ).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Não é possível excluir um aluno com empréstimo ativo.',
+                              ),
+                            ),
+                          );
+
                           return;
                         }
 

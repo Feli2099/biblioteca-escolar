@@ -7,7 +7,7 @@ class TelaAlunos extends StatefulWidget {
   final List<Aluno> alunos;
   final Future<void> Function(Aluno) onAdicionarAluno;
   final Future<void> Function(Aluno) onAtualizarAluno;
-  final Future<void> Function(String) onExcluirAluno;
+  final Future<bool> Function(String) onExcluirAluno;
 
   const TelaAlunos({
     super.key,
