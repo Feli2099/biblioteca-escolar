@@ -5,7 +5,9 @@ import 'package:biblioteca_escolar/modelos/livro.dart';
 import 'package:biblioteca_escolar/servicos/firestore_livros_service.dart';
 import 'package:biblioteca_escolar/modelos/aluno.dart';
 import 'package:biblioteca_escolar/servicos/firestore_alunos_service.dart';
-
+import 'package:biblioteca_escolar/modelos/emprestimo.dart';
+import 'package:biblioteca_escolar/servicos/firestore_emprestimos_service.dart';
+import 'package:biblioteca_escolar/telas/tela_emprestimos.dart';
 
 class TelaInicial extends StatefulWidget {
   const TelaInicial({super.key});
@@ -19,12 +21,14 @@ class TelaInicial extends StatefulWidget {
 class _TelaInicialState extends State<TelaInicial> {
   final List<Livro> _livros = [];
   final List<Aluno> _alunos = [];
+  final List<Emprestimo> _emprestimos = [];
 
   bool _carregandoLivros = true;
   String? _erroCarregamentoLivros;
 
   final FirestoreLivrosService _firestoreLivrosService = FirestoreLivrosService();
   final FirestoreAlunosService _firestoreAlunosService = FirestoreAlunosService();
+  final FirestoreEmprestimosService _firestoreEmprestimosService = FirestoreEmprestimosService();
 
   Future<bool> _adicionarLivro(Livro livro) async {
     final cadastrado = await _firestoreLivrosService.adicionarLivro(livro);
@@ -199,6 +203,51 @@ class _TelaInicialState extends State<TelaInicial> {
     });
   }
 
+  Future<void> _carregarEmprestimos() async {
+    final emprestimosSalvos =
+    await _firestoreEmprestimosService.buscarEmprestimos();
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _emprestimos.clear();
+      _emprestimos.addAll(emprestimosSalvos);
+    });
+  }
+
+  Future<Emprestimo?> _adicionarEmprestimo(
+      Emprestimo emprestimo,
+      ) async {
+    final emprestimoSalvo =
+    await _firestoreEmprestimosService.adicionarEmprestimo(
+      emprestimo,
+    );
+
+    if (emprestimoSalvo == null) {
+      return null;
+    }
+
+    if (mounted) {
+      setState(() {
+        _emprestimos.add(emprestimoSalvo);
+      });
+    }
+
+    return emprestimoSalvo;
+  }
+
+  Future<void> _registrarDevolucao(
+      String idEmprestimo,
+      ) async {
+    await _firestoreEmprestimosService.registrarDevolucao(
+      idEmprestimo,
+    );
+
+    await _carregarEmprestimos();
+  }
+
   @override
   Widget build(BuildContext contextTelaInicial) {
     return Scaffold(
@@ -314,9 +363,51 @@ class _TelaInicialState extends State<TelaInicial> {
             const SizedBox(height: 15),
 
             ElevatedButton(
-              onPressed: () {},
+              onPressed: _carregandoLivros
+                  ? null
+                  : () async {
+                try {
+                  await _carregarAlunos();
+                  await _carregarEmprestimos();
+
+                  if (!contextTelaInicial.mounted) {
+                    return;
+                  }
+
+                  Navigator.push(
+                    contextTelaInicial,
+                    MaterialPageRoute(
+                      builder: (contextoRotaEmprestimos) {
+                        return TelaEmprestimos(
+                          alunos: _alunos,
+                          livros: _livros,
+                          emprestimos: _emprestimos,
+                          onAdicionarEmprestimo:
+                          _adicionarEmprestimo,
+                          onRegistrarDevolucao:
+                          _registrarDevolucao,
+                        );
+                      },
+                    ),
+                  );
+                } catch (erro) {
+                  if (!contextTelaInicial.mounted) {
+                    return;
+                  }
+
+                  ScaffoldMessenger.of(
+                    contextTelaInicial,
+                  ).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Não foi possível carregar os dados dos empréstimos.',
+                      ),
+                    ),
+                  );
+                }
+              },
               child: const Text('Empréstimos'),
-            )
+            ),
           ],
         ),
       ),
