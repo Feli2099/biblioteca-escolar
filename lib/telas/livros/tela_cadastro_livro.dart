@@ -3,6 +3,7 @@ import 'package:biblioteca_escolar/modelos/livro.dart';
 import 'package:biblioteca_escolar/servicos/google_books_service.dart';
 import 'package:biblioteca_escolar/servicos/open_library_service.dart';
 import 'package:biblioteca_escolar/telas/livros/tela_scanner_isbn.dart';
+import 'package:biblioteca_escolar/util/isbn_validator.dart';
 
 class TelaCadastroLivro extends StatefulWidget {
   final Future<bool> Function(Livro) onCadastrar;
@@ -41,69 +42,9 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
     super.dispose();
   }
 
-  bool _isbnValido(String isbn) {
-    final isbnLimpo = isbn.replaceAll(RegExp(r'[\s-]'), '');
-
-    if (isbnLimpo.length == 10) {
-      return _validarIsbn10(isbnLimpo);
-    }
-
-    if (isbnLimpo.length == 13) {
-      return _validarIsbn13(isbnLimpo);
-    }
-
-    return false;
-  }
-
-  bool _validarIsbn13(String isbn) {
-    if (!RegExp(r'^\d{13}$').hasMatch(isbn)) {
-      return false;
-    }
-
-    int soma = 0;
-
-    for (int i = 0; i < 12; i++) {
-      final digito = int.parse(isbn[i]);
-
-      if (i % 2 == 0) {
-        soma += digito;
-      } else {
-        soma += digito * 3;
-      }
-    }
-
-    final digitoVerificador = (10 - (soma % 10)) % 10;
-
-    return digitoVerificador == int.parse(isbn[12]);
-  }
-
-  bool _validarIsbn10(String isbn) {
-    if (!RegExp(r'^\d{9}[\dXx]$').hasMatch(isbn)) {
-      return false;
-    }
-
-    int soma = 0;
-
-    for (int i = 0; i < 9; i++) {
-      final digito = int.parse(isbn[i]);
-      soma += digito * (10 - i);
-    }
-
-    final ultimoCaractere = isbn[9];
-
-    final digitoVerificador =
-    ultimoCaractere.toUpperCase() == 'X'
-        ? 10
-        : int.parse(ultimoCaractere);
-
-    soma += digitoVerificador;
-
-    return soma % 11 == 0;
-  }
-
   Future<void> _buscarLivroPorIsbn(String isbn,
       BuildContext contextTelaCadastroLivro,) async {
-    if (!_isbnValido(isbn)) {
+    if (!IsbnValidator.validar(isbn)) {
       ScaffoldMessenger.of(contextTelaCadastroLivro).showSnackBar(
         const SnackBar(
           content: Text('Informe um ISBN válido antes de buscar.'),
@@ -344,7 +285,7 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
                       return 'Informe o ISBN';
                     }
 
-                    if (!_isbnValido(valor)) {
+                    if (!IsbnValidator.validar(valor)) {
                       return 'Informe um ISBN válido';
                     }
 
