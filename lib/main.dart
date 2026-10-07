@@ -4,6 +4,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'telas/autenticacao/tela_login.dart';
+import 'package:flutter/foundation.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -11,6 +13,24 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  const usarEmuladores = bool.fromEnvironment(
+    'USE_FIREBASE_EMULATOR',
+  );
+
+  if (usarEmuladores) {
+    final host = kIsWeb ? '127.0.0.1' : '10.0.2.2';
+
+    await FirebaseAuth.instance.useAuthEmulator(
+      host,
+      9099,
+    );
+
+    FirebaseFirestore.instance.useFirestoreEmulator(
+      host,
+      8081,
+    );
+  }
 
   runApp(const BibliotecaApp());
 }
