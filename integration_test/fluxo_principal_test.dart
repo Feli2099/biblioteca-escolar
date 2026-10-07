@@ -324,13 +324,16 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      expect(
+      await tester.scrollUntilVisible(
         find.text(tituloLivro),
-        findsOneWidget,
+        300,
+        scrollable: find.byType(Scrollable).last,
       );
 
+      await tester.pumpAndSettle();
+
       expect(
-        find.text('Status: Emprestado'),
+        find.text(tituloLivro),
         findsOneWidget,
       );
 
@@ -341,6 +344,16 @@ void main() {
 
       expect(
         cardEmprestimo,
+        findsOneWidget,
+      );
+
+      final statusEmprestado = find.descendant(
+        of: cardEmprestimo,
+        matching: find.text('Status: Emprestado'),
+      );
+
+      expect(
+        statusEmprestado,
         findsOneWidget,
       );
 
@@ -371,8 +384,31 @@ void main() {
 
       await tester.pumpAndSettle();
 
+      await tester.scrollUntilVisible(
+        find.text(tituloLivro),
+        300,
+        scrollable: find.byType(Scrollable).last,
+      );
+
+      await tester.pumpAndSettle();
+
+      final cardEmprestimoDevolvido = find.ancestor(
+        of: find.text(tituloLivro),
+        matching: find.byType(Card),
+      );
+
       expect(
-        find.text('Status: Devolvido'),
+        cardEmprestimoDevolvido,
+        findsOneWidget,
+      );
+
+      final statusDevolvido = find.descendant(
+        of: cardEmprestimoDevolvido,
+        matching: find.text('Status: Devolvido'),
+      );
+
+      expect(
+        statusDevolvido,
         findsOneWidget,
       );
 
