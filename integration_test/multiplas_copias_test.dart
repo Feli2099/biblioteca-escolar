@@ -91,6 +91,16 @@ Future<void> preencherEmprestimo({
   await tester.pumpAndSettle();
 }
 
+Future<void> limparColecao(String nomeColecao) async {
+  final documentos = await FirebaseFirestore.instance
+      .collection(nomeColecao)
+      .get();
+
+  for (final documento in documentos.docs) {
+    await documento.reference.delete();
+  }
+}
+
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
@@ -149,6 +159,18 @@ void main() {
           find.text('Sistema da Biblioteca'),
           findsOneWidget,
         );
+
+        const usandoEmulador =
+        bool.fromEnvironment('USE_FIREBASE_EMULATOR');
+
+        expect(
+          usandoEmulador,
+          true,
+        );
+
+        await limparColecao('emprestimos');
+        await limparColecao('livros');
+        await limparColecao('alunos');
 
         await tester.tap(
           find.widgetWithText(
@@ -301,6 +323,25 @@ void main() {
 
         await tester.pumpAndSettle();
 
+        final aposPrimeiroEmprestimo =
+        await FirebaseFirestore.instance
+            .collection('emprestimos')
+            .where(
+          'livroIsbn',
+          isEqualTo: isbn,
+        )
+            .get();
+
+        expect(
+          aposPrimeiroEmprestimo.docs.length,
+          1,
+        );
+
+        expect(
+          aposPrimeiroEmprestimo.docs.first.data()['devolvido'],
+          false,
+        );
+
         await preencherEmprestimo(
           tester: tester,
           nomeAluno: nomeAluno,
@@ -317,7 +358,21 @@ void main() {
 
         await tester.pumpAndSettle();
 
-        final doisEmprestimos =
+        final aposSegundoEmprestimo =
+        await FirebaseFirestore.instance
+            .collection('emprestimos')
+            .where(
+          'livroIsbn',
+          isEqualTo: isbn,
+        )
+            .get();
+
+        expect(
+          aposSegundoEmprestimo.docs.length,
+          2,
+        );
+
+        final doisEmprestimosAtivos =
         await FirebaseFirestore.instance
             .collection('emprestimos')
             .where(
@@ -331,7 +386,7 @@ void main() {
             .get();
 
         expect(
-          doisEmprestimos.docs.length,
+          doisEmprestimosAtivos.docs.length,
           2,
         );
 
@@ -381,7 +436,7 @@ void main() {
         await tester.pumpAndSettle();
 
         await tester.scrollUntilVisible(
-          find.text(tituloLivro),
+          find.text(tituloLivro).first,
           300,
           scrollable: find.byType(Scrollable).last,
         );
