@@ -5,13 +5,15 @@ import 'package:biblioteca_escolar/telas/livros/tela_edicao_livro.dart';
 class TelaListagemLivros extends StatefulWidget {
   final List<Livro> livros;
   final Future<bool> Function(String) onExcluirLivro;
-  final Future<void> Function(Livro) onAtualizarLivro;
+  final Future<bool> Function(Livro) onAtualizarLivro;
+  final Future<int> Function(String) onContarEmprestimosAtivos;
 
   const TelaListagemLivros({
     super.key,
     required this.livros,
     required this.onExcluirLivro,
     required this.onAtualizarLivro,
+    required this.onContarEmprestimosAtivos,
   });
 
   @override
@@ -112,6 +114,41 @@ class _TelaListagemLivrosState extends State<TelaListagemLivros> {
 
                               Text('Autor: ${livro.autor}'),
                               Text('ISBN: ${livro.isbn}'),
+                              Text(
+                                'Quantidade total: ${livro.quantidadeTotal}',
+                              ),
+
+                              FutureBuilder<int>(
+                                future: widget.onContarEmprestimosAtivos(
+                                  livro.isbn,
+                                ),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return const Text(
+                                      'Disponíveis: carregando...',
+                                    );
+                                  }
+
+                                  if (snapshot.hasError) {
+                                    return const Text(
+                                      'Disponíveis: não foi possível consultar',
+                                    );
+                                  }
+
+                                  final emprestados = snapshot.data ?? 0;
+
+                                  final disponiveis =
+                                      livro.quantidadeTotal - emprestados;
+
+                                  final disponiveisExibidos =
+                                      disponiveis < 0 ? 0 : disponiveis;
+
+                                  return Text(
+                                    'Disponíveis: $disponiveisExibidos de ${livro.quantidadeTotal}',
+                                  );
+                                },
+                              ),
 
                               if (livro.editora.trim().isNotEmpty)
                                 Text('Editora: ${livro.editora}'),
@@ -141,9 +178,24 @@ class _TelaListagemLivrosState extends State<TelaListagemLivros> {
                             }
 
                             try {
-                              await widget.onAtualizarLivro(livroAtualizado,);
+                              final atualizado =
+                              await widget.onAtualizarLivro(
+                                livroAtualizado,
+                              );
 
                               if (!context.mounted) {
+                                return;
+                              }
+
+                              if (!atualizado) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'A quantidade não pode ser menor que o número de cópias emprestadas.',
+                                    ),
+                                  ),
+                                );
+
                                 return;
                               }
 

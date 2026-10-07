@@ -184,7 +184,7 @@ void main() {
     );
 
     testWidgets(
-      'deve informar quando livro já estiver emprestado',
+      'deve informar quando não houver cópias disponíveis',
           (tester) async {
         await tester.pumpWidget(
           MaterialApp(
@@ -253,7 +253,7 @@ void main() {
 
         expect(
           find.text(
-            'Esse livro já está emprestado.',
+            'Não há cópias disponíveis deste livro.',
           ),
           findsOneWidget,
         );

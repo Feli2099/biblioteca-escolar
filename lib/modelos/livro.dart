@@ -4,6 +4,7 @@ class Livro {
   final String isbn;
   final String editora;
   final String? urlCapa;
+  final int quantidadeTotal;
 
   Livro({
     required this.titulo,
@@ -11,6 +12,7 @@ class Livro {
     required this.isbn,
     required this.editora,
     this.urlCapa,
+    this.quantidadeTotal =1,
   });
 
   Map<String,dynamic> toMap() {
@@ -20,6 +22,7 @@ class Livro {
       'isbn': isbn,
       'editora': editora,
       'urlCapa': urlCapa,
+      'quantidadeTotal': quantidadeTotal,
     };
   }
 
@@ -30,6 +33,7 @@ class Livro {
       isbn: map['isbn'] ?? '',
       editora: map['editora'] ?? '',
       urlCapa: map['urlCapa'],
+      quantidadeTotal: (map['quantidadeTotal'] as num?)?.toInt() ?? 1,
     );
   }
 }

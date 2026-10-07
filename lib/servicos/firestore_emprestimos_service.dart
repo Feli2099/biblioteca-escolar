@@ -9,12 +9,24 @@ class FirestoreEmprestimosService {
     final isbnNormalizado =
     _normalizarIsbn(emprestimo.livroIsbn);
 
-    final possuiEmprestimoAtivo =
-    await livroPossuiEmprestimoAtivo(
-      isbnNormalizado,
-    );
+    final documentoLivro = await _firestore
+        .collection('livros')
+        .doc(isbnNormalizado)
+        .get();
 
-    if (possuiEmprestimoAtivo) {
+    if (!documentoLivro.exists) {
+      throw Exception('Livro não encontrado.');
+    }
+
+    final dadosLivro = documentoLivro.data();
+
+    final quantidadeTotal =
+        (dadosLivro?['quantidadeTotal'] as num?)?.toInt() ?? 1;
+
+    final quantidadeEmprestada =
+    await contarEmprestimosAtivos(isbnNormalizado);
+
+    if (quantidadeEmprestada >= quantidadeTotal) {
       return null;
     }
 
@@ -52,6 +64,24 @@ class FirestoreEmprestimosService {
         documento.id,
       );
     }).toList();
+  }
+
+  Future<int> contarEmprestimosAtivos(String isbn) async {
+    final isbnNormalizado = _normalizarIsbn(isbn);
+
+    final resultado = await _firestore
+        .collection('emprestimos')
+        .where(
+      'livroIsbn',
+      isEqualTo: isbnNormalizado,
+    )
+        .where(
+      'devolvido',
+      isEqualTo: false,
+    )
+        .get();
+
+    return resultado.docs.length;
   }
 
   Future<bool> livroPossuiEmprestimoAtivo(String isbn) async {

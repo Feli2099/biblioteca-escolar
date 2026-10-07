@@ -24,6 +24,8 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
   final TextEditingController _autorController = TextEditingController();
   final TextEditingController _isbnController = TextEditingController();
   final TextEditingController _editoraController = TextEditingController();
+  final TextEditingController _quantidadeController = TextEditingController(text: '1');
+
   String? _urlCapa;
   bool _buscandoLivro = false;
 
@@ -38,6 +40,7 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
     _autorController.dispose();
     _isbnController.dispose();
     _editoraController.dispose();
+    _quantidadeController.dispose();
 
     super.dispose();
   }
@@ -338,6 +341,29 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
                   ),
                 ),
 
+                const SizedBox(height: 16),
+
+                TextFormField(
+                  controller: _quantidadeController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'Quantidade de cópias',
+                  ),
+                  validator: (valor) {
+                    if (valor == null || valor.trim().isEmpty) {
+                      return 'Informe a quantidade de cópias';
+                    }
+
+                    final quantidade = int.tryParse(valor.trim());
+
+                    if (quantidade == null || quantidade <= 0) {
+                      return 'Informe uma quantidade válida';
+                    }
+
+                    return null;
+                  },
+                ),
+
                 const SizedBox(height: 24),
 
                 ElevatedButton(
@@ -364,6 +390,7 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
                       final autor = _autorController.text.trim();
                       final isbn = _isbnController.text.trim();
                       final editora = _editoraController.text.trim();
+                      final quantidade = int.parse(_quantidadeController.text.trim());
 
                       final livro = Livro(
                         titulo: titulo,
@@ -371,6 +398,7 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
                         isbn: isbn,
                         editora: editora,
                         urlCapa: _urlCapa,
+                        quantidadeTotal: quantidade,
                       );
 
                       try {
@@ -413,6 +441,8 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
                       _autorController.clear();
                       _isbnController.clear();
                       _editoraController.clear();
+                      _quantidadeController.text = '1';
+
                       setState(() {
                         _urlCapa = null;
                       });

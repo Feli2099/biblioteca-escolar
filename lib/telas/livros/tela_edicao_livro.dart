@@ -22,6 +22,7 @@ class _TelaEdicaoLivroState extends State<TelaEdicaoLivro> {
   late final TextEditingController _autorController;
   late final TextEditingController _isbnController;
   late final TextEditingController _editoraController;
+  late final TextEditingController _quantidadeController;
 
   @override
   void initState() {
@@ -42,6 +43,10 @@ class _TelaEdicaoLivroState extends State<TelaEdicaoLivro> {
     _editoraController = TextEditingController(
       text: widget.livro.editora,
     );
+
+    _quantidadeController = TextEditingController(
+      text: widget.livro.quantidadeTotal.toString(),
+    );
   }
 
   @override
@@ -50,6 +55,7 @@ class _TelaEdicaoLivroState extends State<TelaEdicaoLivro> {
     _autorController.dispose();
     _isbnController.dispose();
     _editoraController.dispose();
+    _quantidadeController.dispose();
 
     super.dispose();
   }
@@ -116,6 +122,29 @@ class _TelaEdicaoLivroState extends State<TelaEdicaoLivro> {
                   ),
                 ),
 
+                const SizedBox(height: 16),
+
+                TextFormField(
+                  controller: _quantidadeController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'Quantidade de cópias',
+                  ),
+                  validator: (valor) {
+                    if (valor == null || valor.trim().isEmpty) {
+                      return 'Informe a quantidade de cópias';
+                    }
+
+                    final quantidade = int.tryParse(valor.trim());
+
+                    if (quantidade == null || quantidade <= 0) {
+                      return 'Informe uma quantidade válida';
+                    }
+
+                    return null;
+                  },
+                ),
+
                 const SizedBox(height: 24),
 
                 ElevatedButton(
@@ -130,6 +159,7 @@ class _TelaEdicaoLivroState extends State<TelaEdicaoLivro> {
                       isbn: widget.livro.isbn,
                       editora: _editoraController.text.trim(),
                       urlCapa: widget.livro.urlCapa,
+                      quantidadeTotal: int.parse(_quantidadeController.text.trim()),
                     );
 
                     Navigator.pop(

@@ -7,7 +7,8 @@ class TelaLivros extends StatefulWidget {
   final List<Livro> livros;
   final Future<bool> Function(Livro) onAdicionarLivro;
   final Future<bool> Function(String) onExcluirLivro;
-  final Future<void> Function(Livro) onAtualizarLivro;
+  final Future<bool> Function(Livro) onAtualizarLivro;
+  final Future<int> Function(String) onContarEmprestimosAtivos;
 
   const TelaLivros({
     super.key,
@@ -15,6 +16,7 @@ class TelaLivros extends StatefulWidget {
     required this.onAdicionarLivro,
     required this.onExcluirLivro,
     required this.onAtualizarLivro,
+    required this.onContarEmprestimosAtivos,
   });
 
   @override
@@ -62,6 +64,7 @@ class _TelaLivroState extends State<TelaLivros> {
                         livros: widget.livros,
                         onExcluirLivro: widget.onExcluirLivro,
                         onAtualizarLivro: widget.onAtualizarLivro,
+                        onContarEmprestimosAtivos: widget.onContarEmprestimosAtivos,
                       );
                     },
                   ),

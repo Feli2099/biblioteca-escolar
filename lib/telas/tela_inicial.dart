@@ -77,26 +77,48 @@ class _TelaInicialState extends State<TelaInicial> {
     return true;
   }
 
-  Future<void> _atualizarLivro(Livro livroAtualizado) async {
-    await _firestoreLivrosService.atualizarLivro(livroAtualizado);
+  Future<bool> _atualizarLivro(
+      Livro livroAtualizado,
+      ) async {
+    final emprestimosAtivos =
+    await _firestoreEmprestimosService
+        .contarEmprestimosAtivos(
+      livroAtualizado.isbn,
+    );
 
-    await _firestoreEmprestimosService.atualizarTituloLivroEmprestimosAtivos(livroAtualizado.isbn, livroAtualizado.titulo);
+    if (livroAtualizado.quantidadeTotal <
+        emprestimosAtivos) {
+      return false;
+    }
+
+    await _firestoreLivrosService
+        .atualizarLivro(livroAtualizado);
+
+    await _firestoreEmprestimosService
+        .atualizarTituloLivroEmprestimosAtivos(
+      livroAtualizado.isbn,
+      livroAtualizado.titulo,
+    );
 
     if (!mounted) {
-      return;
+      return true;
     }
 
     final indice = _livros.indexWhere(
-      (livro) => _normalizarIsbn(livro.isbn) == _normalizarIsbn(livroAtualizado.isbn),
+          (livro) =>
+      _normalizarIsbn(livro.isbn) ==
+          _normalizarIsbn(livroAtualizado.isbn),
     );
 
     if (indice == -1) {
-      return;
+      return true;
     }
 
     setState(() {
       _livros[indice] = livroAtualizado;
     });
+
+    return true;
   }
 
   String _normalizarIsbn(String isbn) {
@@ -378,6 +400,7 @@ class _TelaInicialState extends State<TelaInicial> {
                           onAdicionarLivro: _adicionarLivro,
                           onExcluirLivro: _excluirLivro,
                           onAtualizarLivro: _atualizarLivro,
+                          onContarEmprestimosAtivos: _firestoreEmprestimosService.contarEmprestimosAtivos,
                         );
                       },
                     ),

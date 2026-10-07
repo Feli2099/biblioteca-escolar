@@ -177,7 +177,7 @@ class _TelaCadastroEmprestimoState
                     ).showSnackBar(
                       const SnackBar(
                         content: Text(
-                          'Esse livro já está emprestado.',
+                          'Não há cópias disponíveis deste livro.',
                         ),
                       ),
                     );

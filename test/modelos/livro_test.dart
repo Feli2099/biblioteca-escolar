@@ -22,6 +22,7 @@ void main() {
         map['urlCapa'],
         'https://exemplo.com/capa.jpg',
       );
+      expect(map['quantidadeTotal'], 1);
     });
 
     test('fromMap deve criar Livro corretamente', () {
@@ -31,6 +32,7 @@ void main() {
         'isbn': '9780451524935',
         'editora': 'Signet',
         'urlCapa': 'https://exemplo.com/1984.jpg',
+        'quantidadeTotal': 3,
       };
 
       final livro = Livro.fromMap(map);
@@ -43,6 +45,7 @@ void main() {
         livro.urlCapa,
         'https://exemplo.com/1984.jpg',
       );
+      expect(livro.quantidadeTotal, 3);
     });
 
     test('fromMap deve aceitar capa nula', () {
@@ -68,6 +71,7 @@ void main() {
       expect(livro.isbn, '');
       expect(livro.editora, '');
       expect(livro.urlCapa, null);
+      expect(livro.quantidadeTotal, 1);
     });
   });
 }
