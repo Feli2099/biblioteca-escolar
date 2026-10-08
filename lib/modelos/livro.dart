@@ -4,6 +4,7 @@ class Livro {
   final String isbn;
   final String editora;
   final String? urlCapa;
+  final String? capaBase64;
   final int quantidadeTotal;
 
   Livro({
@@ -12,6 +13,7 @@ class Livro {
     required this.isbn,
     required this.editora,
     this.urlCapa,
+    this.capaBase64,
     this.quantidadeTotal =1,
   });
 
@@ -22,6 +24,7 @@ class Livro {
       'isbn': isbn,
       'editora': editora,
       'urlCapa': urlCapa,
+      'capaBase64': capaBase64,
       'quantidadeTotal': quantidadeTotal,
     };
   }
@@ -33,6 +36,7 @@ class Livro {
       isbn: map['isbn'] ?? '',
       editora: map['editora'] ?? '',
       urlCapa: map['urlCapa'],
+      capaBase64: map['capaBase64'] as String?,
       quantidadeTotal: (map['quantidadeTotal'] as num?)?.toInt() ?? 1,
     );
   }

@@ -50,6 +50,7 @@ class FirestoreLivrosService {
       'autor': livro.autor,
       'editora': livro.editora,
       'urlCapa': livro.urlCapa,
+      'capaBase64': livro.capaBase64,
       'quantidadeTotal': livro.quantidadeTotal,
     });
   }

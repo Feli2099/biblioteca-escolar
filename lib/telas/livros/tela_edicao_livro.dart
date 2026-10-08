@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:biblioteca_escolar/modelos/livro.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:convert';
+import 'dart:typed_data';
 
 class TelaEdicaoLivro extends StatefulWidget {
   final Livro livro;
@@ -23,6 +26,9 @@ class _TelaEdicaoLivroState extends State<TelaEdicaoLivro> {
   late final TextEditingController _isbnController;
   late final TextEditingController _editoraController;
   late final TextEditingController _quantidadeController;
+  final ImagePicker _imagePicker = ImagePicker();
+  Uint8List? _capaManualBytes;
+  bool _removerCapaManual = false;
 
   @override
   void initState() {
@@ -47,6 +53,17 @@ class _TelaEdicaoLivroState extends State<TelaEdicaoLivro> {
     _quantidadeController = TextEditingController(
       text: widget.livro.quantidadeTotal.toString(),
     );
+
+    if (widget.livro.capaBase64 != null &&
+        widget.livro.capaBase64!.isNotEmpty) {
+      try {
+        _capaManualBytes = base64Decode(
+          widget.livro.capaBase64!,
+        );
+      } catch (erro) {
+        _capaManualBytes = null;
+      }
+    }
   }
 
   @override
@@ -58,6 +75,49 @@ class _TelaEdicaoLivroState extends State<TelaEdicaoLivro> {
     _quantidadeController.dispose();
 
     super.dispose();
+  }
+
+  Future<void> _selecionarImagem() async {
+    final imagem = await _imagePicker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 600,
+      maxHeight: 900,
+      imageQuality: 70,
+    );
+
+    if (imagem == null) {
+      return;
+    }
+
+    final bytes = await imagem.readAsBytes();
+
+    if (bytes.length > 400000) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'A imagem selecionada é muito grande.',
+          ),
+        ),
+      );
+
+      return;
+    }
+
+    setState(() {
+      _capaManualBytes = bytes;
+      _removerCapaManual = false;
+    });
+  }
+
+  void _removerImagemManual() {
+    setState(() {
+      _capaManualBytes = null;
+      _removerCapaManual = true;
+    });
   }
 
   @override
@@ -124,6 +184,63 @@ class _TelaEdicaoLivroState extends State<TelaEdicaoLivro> {
 
                 const SizedBox(height: 16),
 
+                if (_capaManualBytes != null)
+                  Image.memory(
+                    _capaManualBytes!,
+                    width: 140,
+                    height: 200,
+                    fit: BoxFit.cover,
+                  )
+                else if (widget.livro.urlCapa != null &&
+                    widget.livro.urlCapa!.isNotEmpty)
+                  Image.network(
+                    widget.livro.urlCapa!,
+                    width: 140,
+                    height: 200,
+                    fit: BoxFit.cover,
+                    errorBuilder: (
+                        context,
+                        error,
+                        stackTrace,
+                        ) {
+                      return const Icon(
+                        Icons.menu_book_outlined,
+                        size: 60,
+                      );
+                    },
+                  )
+                else
+                  const Icon(
+                    Icons.menu_book_outlined,
+                    size: 60,
+                  ),
+
+                const SizedBox(height: 12),
+
+                ElevatedButton.icon(
+                  onPressed: _selecionarImagem,
+                  icon: const Icon(Icons.image_outlined),
+                  label: Text(
+                    _capaManualBytes == null
+                        ? 'Selecionar imagem'
+                        : 'Trocar imagem',
+                  ),
+                ),
+
+                if (_capaManualBytes != null) ...[
+                  const SizedBox(height: 8),
+
+                  TextButton.icon(
+                    onPressed: _removerImagemManual,
+                    icon: const Icon(Icons.delete_outline),
+                    label: const Text(
+                      'Remover capa',
+                    ),
+                  ),
+                ],
+
+                const SizedBox(height: 16),
+
                 TextFormField(
                   controller: _quantidadeController,
                   keyboardType: TextInputType.number,
@@ -153,12 +270,19 @@ class _TelaEdicaoLivroState extends State<TelaEdicaoLivro> {
                       return;
                     }
 
+                    final capaBase64 = _removerCapaManual
+                        ? null
+                        : _capaManualBytes != null
+                        ? base64Encode(_capaManualBytes!)
+                        : widget.livro.capaBase64;
+
                     final livroAtualizado = Livro(
                       titulo: _tituloController.text.trim(),
                       autor: _autorController.text.trim(),
                       isbn: widget.livro.isbn,
                       editora: _editoraController.text.trim(),
                       urlCapa: widget.livro.urlCapa,
+                      capaBase64: capaBase64,
                       quantidadeTotal: int.parse(_quantidadeController.text.trim()),
                     );
 

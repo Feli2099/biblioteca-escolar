@@ -10,6 +10,7 @@ void main() {
         isbn: '9780000000000',
         editora: 'HarperCollins',
         urlCapa: 'https://exemplo.com/capa.jpg',
+        capaBase64: 'imagem-em-base64',
       );
 
       final map = livro.toMap();
@@ -22,6 +23,10 @@ void main() {
         map['urlCapa'],
         'https://exemplo.com/capa.jpg',
       );
+      expect(
+        map['capaBase64'],
+        'imagem-em-base64',
+      );
       expect(map['quantidadeTotal'], 1);
     });
 
@@ -32,6 +37,7 @@ void main() {
         'isbn': '9780451524935',
         'editora': 'Signet',
         'urlCapa': 'https://exemplo.com/1984.jpg',
+        'capaBase64': 'imagem-em-base64',
         'quantidadeTotal': 3,
       };
 
@@ -45,6 +51,10 @@ void main() {
         livro.urlCapa,
         'https://exemplo.com/1984.jpg',
       );
+      expect(
+        livro.capaBase64,
+        'imagem-em-base64',
+      );
       expect(livro.quantidadeTotal, 3);
     });
 
@@ -55,11 +65,13 @@ void main() {
         'isbn': '1234567890',
         'editora': '',
         'urlCapa': null,
+        'capaBase64': null,
       };
 
       final livro = Livro.fromMap(map);
 
       expect(livro.urlCapa, null);
+      expect(livro.capaBase64, null);
       expect(livro.editora, '');
     });
 
@@ -71,6 +83,7 @@ void main() {
       expect(livro.isbn, '');
       expect(livro.editora, '');
       expect(livro.urlCapa, null);
+      expect(livro.capaBase64, null);
       expect(livro.quantidadeTotal, 1);
     });
   });

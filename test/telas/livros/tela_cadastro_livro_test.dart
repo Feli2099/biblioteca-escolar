@@ -3,6 +3,27 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:biblioteca_escolar/modelos/livro.dart';
 import 'package:biblioteca_escolar/telas/livros/tela_cadastro_livro.dart';
 
+Future<void> tocarCadastrar(
+    WidgetTester tester,
+    ) async {
+  final botaoCadastrar = find.widgetWithText(
+    ElevatedButton,
+    'Cadastrar',
+  );
+
+  await tester.ensureVisible(
+    botaoCadastrar,
+  );
+
+  await tester.pumpAndSettle();
+
+  await tester.tap(
+    botaoCadastrar,
+  );
+
+  await tester.pumpAndSettle();
+}
+
 void main() {
   group('TelaCadastroLivro', () {
     testWidgets(
@@ -18,11 +39,7 @@ void main() {
           ),
         );
 
-        await tester.tap(
-          find.text('Cadastrar'),
-        );
-
-        await tester.pump();
+        await tocarCadastrar(tester);
 
         expect(
           find.text('Informe o título'),
@@ -76,11 +93,7 @@ void main() {
           'Editora Teste',
         );
 
-        await tester.tap(
-          find.text('Cadastrar'),
-        );
-
-        await tester.pump();
+        await tocarCadastrar(tester);
 
         expect(
           find.text('Informe um ISBN válido'),
@@ -127,11 +140,7 @@ void main() {
           'HarperCollins',
         );
 
-        await tester.tap(
-          find.text('Cadastrar'),
-        );
-
-        await tester.pumpAndSettle();
+        await tocarCadastrar(tester);
 
         expect(
           livroRecebido,

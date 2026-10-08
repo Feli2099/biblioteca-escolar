@@ -4,6 +4,10 @@ import 'package:biblioteca_escolar/servicos/google_books_service.dart';
 import 'package:biblioteca_escolar/servicos/open_library_service.dart';
 import 'package:biblioteca_escolar/telas/livros/tela_scanner_isbn.dart';
 import 'package:biblioteca_escolar/util/isbn_validator.dart';
+import 'dart:typed_data';
+import 'dart:convert';
+
+import 'package:image_picker/image_picker.dart';
 
 class TelaCadastroLivro extends StatefulWidget {
   final Future<bool> Function(Livro) onCadastrar;
@@ -25,6 +29,8 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
   final TextEditingController _isbnController = TextEditingController();
   final TextEditingController _editoraController = TextEditingController();
   final TextEditingController _quantidadeController = TextEditingController(text: '1');
+  final ImagePicker _imagePicker = ImagePicker();
+  Uint8List? _capaManualBytes;
 
   String? _urlCapa;
   bool _buscandoLivro = false;
@@ -230,6 +236,41 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
     }
   }
 
+  Future<void> _selecionarImagem() async {
+    final imagem = await _imagePicker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 600,
+      maxHeight: 900,
+      imageQuality: 70,
+    );
+
+    if (imagem == null) {
+      return;
+    }
+
+    final bytes = await imagem.readAsBytes();
+
+    if (bytes.length > 400000) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'A imagem selecionada é muito grande.',
+          ),
+        ),
+      );
+
+      return;
+    }
+
+    setState(() {
+      _capaManualBytes = bytes;
+    });
+  }
+
   @override
   Widget build(BuildContext contextTelaCadastroLivro) {
     return Scaffold(
@@ -343,6 +384,32 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
 
                 const SizedBox(height: 16),
 
+                if (_capaManualBytes != null)
+                  Center(
+                    child: Image.memory(
+                      _capaManualBytes!,
+                      width: 140,
+                      height: 200,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+
+                const SizedBox(height: 12),
+
+                Center(
+                  child: ElevatedButton.icon(
+                    onPressed: _selecionarImagem,
+                    icon: const Icon(Icons.image_outlined),
+                    label: Text(
+                      _capaManualBytes == null
+                          ? 'Selecionar imagem'
+                          : 'Trocar imagem',
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
                 TextFormField(
                   controller: _quantidadeController,
                   keyboardType: TextInputType.number,
@@ -377,7 +444,7 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
                   child: Text(
                     _buscandoLivro
                         ? 'Buscando...'
-                        : 'Buscar iSBN'
+                        : 'Buscar ISBN'
                   ),
                 ),
 
@@ -391,6 +458,9 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
                       final isbn = _isbnController.text.trim();
                       final editora = _editoraController.text.trim();
                       final quantidade = int.parse(_quantidadeController.text.trim());
+                      final capaBase64 = _capaManualBytes == null
+                          ? null
+                          : base64Encode(_capaManualBytes!);
 
                       final livro = Livro(
                         titulo: titulo,
@@ -398,6 +468,7 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
                         isbn: isbn,
                         editora: editora,
                         urlCapa: _urlCapa,
+                        capaBase64: capaBase64,
                         quantidadeTotal: quantidade,
                       );
 
@@ -445,6 +516,7 @@ class _TelaCadastroLivro extends State<TelaCadastroLivro> {
 
                       setState(() {
                         _urlCapa = null;
+                        _capaManualBytes = null;
                       });
                     }
                   },

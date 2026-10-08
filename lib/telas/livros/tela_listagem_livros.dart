@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:biblioteca_escolar/modelos/livro.dart';
 import 'package:biblioteca_escolar/telas/livros/tela_edicao_livro.dart';
+import 'dart:convert';
 
 class TelaListagemLivros extends StatefulWidget {
   final List<Livro> livros;
@@ -23,6 +24,54 @@ class TelaListagemLivros extends StatefulWidget {
 }
 
 class _TelaListagemLivrosState extends State<TelaListagemLivros> {
+
+  Widget _construirCapa(Livro livro) {
+    if (livro.capaBase64 != null &&
+        livro.capaBase64!.isNotEmpty) {
+      try {
+        final bytes = base64Decode(livro.capaBase64!);
+
+        return Image.memory(
+          bytes,
+          width: 80,
+          height: 110,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return const Icon(
+              Icons.menu_book_outlined,
+              size: 50,
+            );
+          },
+        );
+      } catch (erro) {
+        return const Icon(
+          Icons.menu_book_outlined,
+          size: 50,
+        );
+      }
+    }
+
+    if (livro.urlCapa != null &&
+        livro.urlCapa!.isNotEmpty) {
+      return Image.network(
+        livro.urlCapa!,
+        width: 80,
+        height: 110,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return const Icon(
+            Icons.menu_book_outlined,
+            size: 50,
+          );
+        },
+      );
+    }
+
+    return const Icon(
+      Icons.menu_book_outlined,
+      size: 50,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,54 +96,20 @@ class _TelaListagemLivrosState extends State<TelaListagemLivros> {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (livro.urlCapa != null)
-                          Container(
-                            width: 80,
-                            height: 120,
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: Colors.grey,
-                                width: 1,
-                              ),
-                              borderRadius: BorderRadius.circular(8),
+                        Container(
+                          width: 80,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: Colors.grey,
+                              width: 1,
                             ),
-                            clipBehavior: Clip.antiAlias,
-                            child: Image.network(
-                              livro.urlCapa!,
-                              key: ValueKey(livro.urlCapa),
-                              fit: BoxFit.cover,
-                              webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
-                              errorBuilder: (
-                                  contextImagem,
-                                  error,
-                                  stackTrace,
-                                  ) {
-                                return const Center(
-                                  child: Icon(
-                                    Icons.menu_book,
-                                    size: 40,
-                                  ),
-                                );
-                              },
-                            ),
-                          )
-                        else
-                          Container(
-                            width: 80,
-                            height: 120,
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: Colors.grey,
-                                width: 1,
-                              ),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            alignment: Alignment.center,
-                            child: const Icon(
-                              Icons.menu_book,
-                              size: 40,
-                            ),
+                            borderRadius: BorderRadius.circular(8),
                           ),
+                          clipBehavior: Clip.antiAlias,
+                          alignment: Alignment.center,
+                          child: _construirCapa(livro),
+                        ),
 
                         const SizedBox(width: 16),
 
