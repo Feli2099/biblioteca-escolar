@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.biblioteca_escolar"
+    namespace = "br.com.bibliotecaescolar.app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -17,7 +17,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.biblioteca_escolar"
+        applicationId = "br.com.bibliotecaescolar.app"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

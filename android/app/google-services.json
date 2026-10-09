@@ -7,6 +7,25 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:748148779651:android:437f15d8442688800a09b6",
+        "android_client_info": {
+          "package_name": "br.com.bibliotecaescolar.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCkSWXJU7KL6pnywTcSpOtDlNc6P9p4v2U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:748148779651:android:513d7e468cc3f0130a09b6",
         "android_client_info": {
           "package_name": "com.example.biblioteca_escolar"

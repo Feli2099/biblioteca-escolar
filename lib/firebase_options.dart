@@ -51,7 +51,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyCkSWXJU7KL6pnywTcSpOtDlNc6P9p4v2U',
-    appId: '1:748148779651:android:513d7e468cc3f0130a09b6',
+    appId: '1:748148779651:android:437f15d8442688800a09b6',
     messagingSenderId: '748148779651',
     projectId: 'biblioteca-escolar-feli2099',
     storageBucket: 'biblioteca-escolar-feli2099.firebasestorage.app',
